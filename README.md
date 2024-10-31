@@ -2,6 +2,8 @@
 
 [![Documentation Status](https://readthedocs.org/projects/cucaracha/badge/?version=latest)](https://cucaracha.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/acsenrafilho/cucaracha/graph/badge.svg?token=TgmCLPoIbW)](https://codecov.io/gh/acsenrafilho/cucaracha)
+[![CI Main](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml/badge.svg?branch=main)](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml)
+[![CI Develop](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml/badge.svg?branch=develop)](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml)
 
 # cucaracha
 
