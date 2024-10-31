@@ -1,0 +1,15 @@
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body {
+    background: rgb(255, 255, 255);    
+}
+
+:root {
+    --md-primary-fg-color:        #a3250f;
+    --md-primary-fg-color--light: #rgb(236, 249, 253);
+    --md-primary-fg-color--dark:  #0d1a34;
+  }

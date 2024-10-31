@@ -1,0 +1,53 @@
+site_name: cucaracha
+repo_url: https://github.com/acsenrafilho/cucaracha
+repo_name: acsenrafilho/cucaracha
+edit_uri: tree/main/docs
+
+theme:
+  name: material
+  language: en
+  logo: assets/cucaracha-favicon.png
+  favicon: assets/cucaracha-favicon.png
+  palette:
+    scheme: default
+    primary: custom
+    accent: red
+  font:
+    text: Noto Serif
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - content.code.copy
+    - content.footnote.tooltips
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.expand
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - footnotes
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - 'index.md'
+  - 'installation_guide.md'
+  - 'getting_started.md'
+  - 'faq.md'
+  - 'contribute.md'
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [cucaracha]
