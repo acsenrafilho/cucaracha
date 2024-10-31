@@ -1,5 +1,8 @@
 <img src="https://raw.githubusercontent.com/acsenrafilho/cucaracha/refs/heads/main/docs/assets/cucaracha-logo.png" width=700>
 
+[![Documentation Status](https://readthedocs.org/projects/cucaracha/badge/?version=latest)](https://cucaracha.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/acsenrafilho/cucaracha/graph/badge.svg?token=TgmCLPoIbW)](https://codecov.io/gh/acsenrafilho/cucaracha)
+
 # cucaracha
 
 A bureaucratic cockroach (Mr. Cucaracha) assistent to help in document processing and analysis
@@ -11,7 +14,7 @@ This library was designed to assist users in performing digital document analysi
 
 The major objective of this project is to give an open-source alternative to PDF and image document files, aggregating methods to assist in digital documento analysis and context recognition.
 
-Please read the [full documentation]() to get more details about the usage, implementation and updates in the `cucaracha` library. 
+Please read the [full documentation](https://cucaracha.readthedocs.io/en/latest/) to get more details about the usage, implementation and updates in the `cucaracha` library. 
 
 Also, feel free to contribute directly to the project! Check it out the [issues](https://github.com/acsenrafilho/cucaracha/issues) at the repository and get in touch to the developers of the project. 
 
