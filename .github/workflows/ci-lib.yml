@@ -23,7 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install SO dependencies
-        run: apt-get update && apt-get install libgl1 -y
+        run: sudo apt-get update && apt-get install libgl1 -y
 
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
