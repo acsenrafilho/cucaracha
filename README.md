@@ -1,7 +1,7 @@
 <img src="https://raw.githubusercontent.com/acsenrafilho/cucaracha/refs/heads/main/docs/assets/cucaracha-logo.png" width=700>
 
 [![Documentation Status](https://readthedocs.org/projects/cucaracha/badge/?version=latest)](https://cucaracha.readthedocs.io/en/latest/?badge=latest)
-
+[![codecov](https://codecov.io/gh/acsenrafilho/cucaracha/graph/badge.svg?token=TgmCLPoIbW)](https://codecov.io/gh/acsenrafilho/cucaracha)
 
 # cucaracha
 
