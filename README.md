@@ -5,23 +5,6 @@
 [![CI Main](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml/badge.svg?branch=main)](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml)
 [![CI Develop](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml/badge.svg?branch=develop)](https://github.com/acsenrafilho/cucaracha/actions/workflows/ci-lib.yml)
 
-# cucaracha
-
-A bureaucratic cockroach (Mr. Cucaracha) assistent to help in document processing and analysis
-
-
-## I'm here to assist you with digital document processing and analysis
-
-This library was designed to assist users in performing digital document analysis and processing, giving a basic toolkit to collect and transform textual content in structures and non-structured data.
-
-The major objective of this project is to give an open-source alternative to PDF and image document files, aggregating methods to assist in digital documento analysis and context recognition.
-
-Please read the [full documentation](https://cucaracha.readthedocs.io/en/latest/) to get more details about the usage, implementation and updates in the `cucaracha` library. 
-
-Also, feel free to contribute directly to the project! Check it out the [issues](https://github.com/acsenrafilho/cucaracha/issues) at the repository and get in touch to the developers of the project. 
-
-
-
 # cucaracha 🪳
 
 Inspired by Franz Kafka's infamous character, Gregor Samsa — an ordinary man who wakes up to find himself transformed into a cockroach in *The Metamorphosis*. Here, `cucaracha` embodies the metaphor of a tireless, sometimes bureaucratic helper working tirelessly in the background. In the digital age, Mr. Cucaracha is here to assist you with the complex and often tedious tasks of document processing and analysis.
