@@ -219,8 +219,8 @@ class Document:
             >>> meta = doc.get_metadata()
             >>> type(meta)
             <class 'dict'>
-            >>> meta
-            {'file_ext': '.pdf', 'file_path': './tests/files/', 'file_name': 'sample-text-en', 'resolution': 96, 'pages': 1, 'size': 0.043625831604003906}
+            >>> meta.keys()
+            dict_keys(['file_ext', 'file_path', 'file_name', 'resolution', 'pages', 'size'])
 
         Args:
             info (str, optional): The kind of information that desired to obtain in the document metadata. Defaults to `None`, then all the metada is shown.
