@@ -45,6 +45,7 @@ nav:
   - 'faq.md'
   - 'api/document.md'
   - 'api/threshold.md'
+  - 'api/noise_removal.md'
   - 'contribute.md'
 
 plugins:
