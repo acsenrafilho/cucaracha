@@ -1,3 +1,5 @@
+import os
+
 import cv2 as cv
 import numpy as np
 
@@ -18,17 +20,17 @@ def otsu(input: np.ndarray):
         and poorly remove part of the text.
 
 
-    # Examples:
-    #     >>> input_img = cv.imread('./tests/files/sample-text-en.png')
-    #     >>> output_img, extra = otsu(input_img)
-    #     >>> np.min(output_img)
-    #     0
-    #     >>> np.max(output_img)
-    #     255
-    #     >>> output_img.shape
-    #     (320, 320)
-    #     >>> extra
-    #     {'thr_value': 160.0}
+    Examples:
+        >>> input_img = cv.imread('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.png')
+        >>> output_img, extra = otsu(input_img)
+        >>> np.min(output_img)
+        0
+        >>> np.max(output_img)
+        255
+        >>> output_img.shape
+        (320, 320)
+        >>> extra
+        {'thr_value': 160.0}
 
     Warning:
         The Otsu method is based on gray-scaled images. Then, if the input
@@ -41,6 +43,11 @@ def otsu(input: np.ndarray):
         input (np.ndarray): The input image that will be binarized using Otsu
         method. It must be a gray-scale data. If not provided, then it is done
         an automatic conversion.
+
+    Reference:
+        Nobuyuki Otsu, A Threshold Selection Method from Gray-Level Histograms. IEEE
+        Transactions on Systems, Man, and Cybernetics ( Volume: 9, Issue: 1,
+        January 1979)
 
     Returns:
         (np.array, dict): The output image in binary format. It is also give the threshold value found by the Otsu method (key: `thr_value`)
