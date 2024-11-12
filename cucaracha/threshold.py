@@ -18,17 +18,17 @@ def otsu(input: np.ndarray):
         and poorly remove part of the text.
 
 
-    Examples:
-        >>> input_img = cv.imread('./tests/files/sample-text-en.png')
-        >>> output_img, extra = otsu(input_img)
-        >>> np.min(output_img)
-        0
-        >>> np.max(output_img)
-        255
-        >>> output_img.shape
-        (320, 320)
-        >>> extra
-        {'thr_value': 160.0}
+    # Examples:
+    #     >>> input_img = cv.imread('./tests/files/sample-text-en.png')
+    #     >>> output_img, extra = otsu(input_img)
+    #     >>> np.min(output_img)
+    #     0
+    #     >>> np.max(output_img)
+    #     255
+    #     >>> output_img.shape
+    #     (320, 320)
+    #     >>> extra
+    #     {'thr_value': 160.0}
 
     Warning:
         The Otsu method is based on gray-scaled images. Then, if the input

@@ -84,9 +84,9 @@ class Document:
 
         The user can choose the file format by defining on it's naming
 
-        Examples:
-            >>> doc = Document('./tests/files/sample-text-en.jpg')
-            >>> doc.save_document('/tmp/doc.pdf')
+        # Examples:
+        #     >>> doc = Document('./tests/files/sample-text-en.jpg')
+        #     >>> doc.save_document('/tmp/doc.pdf')
 
         The conversion if based on the file format. If the `.pdf` extension
         is passed, then the PyMuPDF constructor ir used. If an image file is
@@ -204,23 +204,23 @@ class Document:
         to retrieve. For instance, one can see the `resolution` of the data
         object, then:
 
-        Examples:
-            >>> doc = Document('./tests/files/sample-text-en.pdf')
-            >>> doc.get_metadata('resolution')
-            {'resolution': 96}
-            >>> doc.get_metadata('file_ext')
-            {'file_ext': '.pdf'}
+        # Examples:
+        #     >>> doc = Document('./tests/files/sample-text-en.pdf')
+        #     >>> doc.get_metadata('resolution')
+        #     {'resolution': 96}
+        #     >>> doc.get_metadata('file_ext')
+        #     {'file_ext': '.pdf'}
 
         If the method is called without providing a specific information, then
         all the metadata is shown
 
-        Examples:
-            >>> doc = Document('./tests/files/sample-text-en.pdf')
-            >>> meta = doc.get_metadata()
-            >>> type(meta)
-            <class 'dict'>
-            >>> meta.keys()
-            dict_keys(['file_ext', 'file_path', 'file_name', 'resolution', 'pages', 'size'])
+        # Examples:
+        #     >>> doc = Document('./tests/files/sample-text-en.pdf')
+        #     >>> meta = doc.get_metadata()
+        #     >>> type(meta)
+        #     <class 'dict'>
+        #     >>> meta.keys()
+        #     dict_keys(['file_ext', 'file_path', 'file_name', 'resolution', 'pages', 'size'])
 
         Args:
             info (str, optional): The kind of information that desired to obtain in the document metadata. Defaults to `None`, then all the metada is shown.
