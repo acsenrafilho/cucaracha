@@ -275,7 +275,7 @@ def test_get_metadata_returns_the_object_metadata(img_path, info, type_out):
     obj = Document(img_path)
     meta = obj.get_metadata(info)
 
-    assert type(meta) == type_out
+    assert type(meta[info]) == type_out
 
 
 @pytest.mark.parametrize(
