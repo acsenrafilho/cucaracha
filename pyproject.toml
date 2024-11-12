@@ -5,6 +5,15 @@ description = "Mr. Franz Cucaracha will be glad to assist you to the document an
 authors = ["Antonio Senra Filho <acsenrafilho@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+classifiers = [
+    Operating System :: OS Independent,
+    Topic :: Scientific/Engineering :: Image Processing,
+    Topic :: Scientific/Engineering :: Image Recognition,
+    Topic :: Scientific/Engineering :: Information Analysis,
+    License :: OSI Approved :: MIT License,
+    Topic :: Scientific/Engineering,
+    Topic :: Scientific/Engineering :: Artificial Intelligence
+]
 
 [tool.poetry.urls]
 "Documentation" = "https://cucaracha.readthedocs.io/en/latest/"
