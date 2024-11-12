@@ -6,13 +6,13 @@ authors = ["Antonio Senra Filho <acsenrafilho@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 classifiers = [
-    Operating System :: OS Independent,
-    Topic :: Scientific/Engineering :: Image Processing,
-    Topic :: Scientific/Engineering :: Image Recognition,
-    Topic :: Scientific/Engineering :: Information Analysis,
-    License :: OSI Approved :: MIT License,
-    Topic :: Scientific/Engineering,
-    Topic :: Scientific/Engineering :: Artificial Intelligence,
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
 [tool.poetry.urls]
