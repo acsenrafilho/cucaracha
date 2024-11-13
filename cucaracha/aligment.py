@@ -1,6 +1,5 @@
 import cv2 as cv
 import numpy as np
-from scipy import ndimage
 
 
 def inplane_deskew(input: np.ndarray, max_skew=10):
