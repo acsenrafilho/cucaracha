@@ -43,10 +43,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
-      - name: Create Documentation preview (only Linux)
-        uses: readthedocs/actions/preview@v1
-        with:
-          project-slug: "cucaracha"
 
   windows:
     runs-on: windows-latest
