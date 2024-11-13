@@ -24,9 +24,9 @@ def sparse_dots(input: np.ndarray, kernel_size: int = 1):
         ValueError: Kernel size must be an odd value
 
     Returns:
-        (np.ndarray): Output image without major sparse dots noise
+        (np.ndarray, dict): Output image without major sparse dots noise. This method does not return and extra information, then get an empty dict.
     """
     if kernel_size % 2 == 0:
         raise ValueError('Kernel size must be an odd value.')
 
-    return cv.medianBlur(input, kernel_size)
+    return cv.medianBlur(input, kernel_size), {}
