@@ -4,6 +4,12 @@ import cv2 as cv
 import numpy as np
 import pymupdf
 from pymupdf import Page
+from rich import print
+from rich.progress import track
+
+from cucaracha.aligment import inplane_deskew
+from cucaracha.noise_removal import sparse_dots
+from cucaracha.threshold import otsu
 
 
 class Document:
@@ -267,9 +273,96 @@ class Document:
 
         return self._doc_file[page]
 
-    def batch_processing(self, processors: list):
-        # TODO Make a loop processor to make image processing to the doc_file
-        pass
+    def set_page(self, page: np.ndarray, index: int):
+        """Update a new page into the document file
+
+        The page index must be passed considering the total range of pages
+        in the document. See the metadata to get this information.
+
+        Examples:
+            >>> doc = Document('./'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.pdf')
+            >>> doc.get_metadata('pages')
+            {'pages': 1}
+
+            The original information is loaded as usual
+            >>> np.max(doc.get_page(0))
+            255
+
+            But a new page can be changed like this:
+            >>> new_page = np.ones(doc.get_page(0).shape)
+            >>> doc.set_page(new_page, 0)
+
+            Then the new page is placed in the document object
+            >>> np.max(doc.get_page(0))
+            1.0
+
+        Args:
+            page (np.ndarray): A numpy array with the same shape of the other pages
+            index (int): The index where the new page should be placed
+
+        Raises:
+            ValueError: Page index is out of range (total page is ... and must be a positive integer)
+            ValueError: New page is not a numpy array or has different shape from previous pages
+        """
+        if index > len(self._doc_file) or index < 0:
+            raise ValueError(
+                f'Page index is out of range (total page is {len(self._doc_file)} and must be a positive integer)'
+            )
+
+        if (
+            not isinstance(page, np.ndarray)
+            or page.shape != self.get_page(index).shape
+        ):
+            raise ValueError(
+                'New page is not a numpy array or has different shape from previous pages'
+            )
+
+        self._doc_file[index] = page
+
+    def run_pipeline(self, processors: list):
+        """Execute a list of image processing methods to the document file
+        allocated in the `Document` object.
+
+        The processing order is the same as indicated in the list of processors.
+
+        Examples:
+            One can define a processor as a function caller:
+            >>> def proc2(input): return sparse_dots(input, 3)
+            >>> def proc3(input): return inplane_deskew(input, 25)
+            >>> proc_list = [otsu, proc2, proc3]
+
+            After the `proc_list` being created, the proper execution can be
+            called using:
+            >>> doc = Document('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.pdf')
+            >>> doc.run_pipeline(proc_list) # doctest: +SKIP
+            Applying processors... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+
+            Hence, the inner document file in the `doc` object is updated:
+            >>> type(doc.get_page(0))
+            <class 'numpy.ndarray'>
+
+        Warning:
+            All the processor in the list must be of `cucaracha` filter type.
+            Hence, make sure that the processor instance accepts an numpy array
+            as input and returns a tuple with numpy array and a dictionary of
+            extra parameters (`(np.ndarray, dict)`).
+
+        Note:
+            All the pages presented in the document object is processed. If it
+            is desired to apply only on specific pages, then it is need to
+            process it individually and then update the page using the method
+            `set_page`
+
+        Args:
+            processors (list): _description_
+        """
+        self._check_processor_list(processors)
+
+        for proc in track(
+            processors, description='[green]Applying processors...'
+        ):
+            for idx, page in enumerate(self._doc_file):
+                self._doc_file[idx] = proc(page)[0]
 
     def _read_by_ext(self, path, dpi):
         _, file_ext = os.path.splitext(path)
@@ -312,3 +405,20 @@ class Document:
 
             # Set file number of pages
             self._doc_metadata['pages'] = len(self._doc_file)
+
+    def _check_processor_list(self, processors):
+        if type(processors) != list:
+            raise ValueError(
+                'processors must be a list of valid cucaracha filter methods'
+            )
+
+        for proc in processors:
+            out_test = proc(self.get_page(0))   # Test the processor output
+            if (
+                type(out_test) != tuple
+                or not isinstance(out_test[0], np.ndarray)
+                or not isinstance(out_test[1], dict)
+            ):
+                raise TypeError(
+                    f'Processor: {proc.__name__} is not valid. Unsure that the output processor is valid.'
+                )

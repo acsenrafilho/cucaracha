@@ -4,6 +4,9 @@ import numpy as np
 import pytest
 
 from cucaracha import Document
+from cucaracha.aligment import inplane_deskew
+from cucaracha.noise_removal import sparse_dots
+from cucaracha.threshold import otsu
 from tests import sample_paths
 
 
@@ -323,3 +326,111 @@ def test_get_metadata_with_wrong_info_raise_error(img_path, info):
         e.value.args[0]
         == 'Info is not provided in the Document class metadata'
     )
+
+
+def test_run_pipeline_raise_error_when_list_of_processors_has_invalid_method():
+    def proc2(input):
+        return sparse_dots(input, 3)
+
+    def proc3(input):
+        return inplane_deskew(input, 25)
+
+    proc_list = [otsu, proc2, proc3, np.array]
+
+    doc = Document(sample_paths.SAMPLE_CUCARACHA_GRAY_TIF)
+    with pytest.raises(Exception) as e:
+        doc.run_pipeline(proc_list)
+
+    assert (
+        e.value.args[0]
+        == 'Processor: array is not valid. Unsure that the output processor is valid.'
+    )
+
+
+def test_run_pipeline_raise_error_when_processors_is_not_a_list():
+    proc_list = otsu
+
+    doc = Document(sample_paths.SAMPLE_CUCARACHA_GRAY_TIF)
+    with pytest.raises(Exception) as e:
+        doc.run_pipeline(proc_list)
+
+    assert (
+        e.value.args[0]
+        == 'processors must be a list of valid cucaracha filter methods'
+    )
+
+
+def test_run_pipeline_with_valid_processors_methods():
+    def proc2(input):
+        return sparse_dots(input, 3)
+
+    def proc3(input):
+        return inplane_deskew(input, 25)
+
+    proc_list = [otsu, proc2, proc3]
+
+    doc = Document(sample_paths.SAMPLE_CUCARACHA_GRAY_TIF)
+    doc.run_pipeline(proc_list)
+
+    assert isinstance(doc.get_page(0), np.ndarray)
+
+
+@pytest.mark.parametrize(
+    'page,wrong_index',
+    [
+        (sample_paths.SAMPLE_CUCARACHA_GRAY_GAUSS_PNG, 2),
+        (sample_paths.SAMPLE_CUCARACHA_GRAY_GAUSS_PNG, -1),
+    ],
+)
+def test_set_page_raise_error_when_index_is_out_of_document_pages_range(
+    page, wrong_index
+):
+    doc = Document(page)
+    new_page = np.ones(doc.get_page(0).shape)
+
+    with pytest.raises(Exception) as e:
+        doc.set_page(new_page, wrong_index)
+
+    assert (
+        e.value.args[0]
+        == 'Page index is out of range (total page is 1 and must be a positive integer)'
+    )
+
+
+@pytest.mark.parametrize(
+    'page',
+    [
+        (sample_paths.SAMPLE_CUCARACHA_GRAY_GAUSS_PNG),
+        (sample_paths.SAMPLE_TEXT_JPG),
+        (sample_paths.SAMPLE_TEXT_PDF),
+    ],
+)
+def test_set_page_raise_error_when_page_is_not_an_numpy_array(page):
+    doc = Document(page)
+    new_wrong_page = np.ones((1, 1, 1))
+
+    with pytest.raises(Exception) as e:
+        doc.set_page(new_wrong_page, 0)
+
+    assert (
+        e.value.args[0]
+        == 'New page is not a numpy array or has different shape from previous pages'
+    )
+
+
+@pytest.mark.parametrize(
+    'page,index',
+    [
+        (sample_paths.SAMPLE_CUCARACHA_GRAY_GAUSS_PNG, 0),
+        (sample_paths.SAMPLE_CUCARACHA_GRAY_TIF, 0),
+        (sample_paths.SAMPLE_TEXT_PDF, 0),
+        (sample_paths.SAMPLE_TEXT_PNG, 0),
+    ],
+)
+def test_set_page_change_correctly_document_page(page, index):
+    doc = Document(page)
+    new_page = np.ones(doc.get_page(0).shape)
+
+    doc.set_page(new_page, index)
+
+    assert np.max(doc.get_page(0)) == 1
