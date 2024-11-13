@@ -24,6 +24,6 @@ def test_sparse_dots_raise_error_when_kernel_size_is_even(input, kernel):
 def test_sparse_dots_remove_major_salt_paper_noise_correctly():
     input = sample_paths.SAMPLE_CUCARACHA_GRAY_SALT_PEPPER_PNG
     doc = Document(input)
-    out = sparse_dots(doc.get_page(0))
+    out, _ = sparse_dots(doc.get_page(0))
 
     assert np.abs(np.mean(out) - np.mean(doc.get_page(0))) < 10
