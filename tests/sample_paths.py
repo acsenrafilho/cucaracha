@@ -82,21 +82,39 @@ SAMPLE_CUCARACHA_RGB_ROT_MINUS10_PNG = (
     + os.sep
     + 'sample-cucaracha-rgb-white-bg-rot-minus10d.png'
 )
-SAMPLE_CUCARACHA_GRAY_ROT_PLUS10_PNG = (
+SAMPLE_CUCARACHA_GRAY_ROT_PLUS10_TIF = (
     '.'
     + os.sep
     + 'tests'
     + os.sep
     + 'files'
     + os.sep
-    + 'sample-cucaracha-gray-white-bg-rot-plus10d.png'
+    + 'sample-cucaracha-gray-white-bg-rot-plus10d.tif'
 )
-SAMPLE_CUCARACHA_GRAY_ROT_MINUS10_PNG = (
+SAMPLE_CUCARACHA_GRAY_ROT_MINUS10_TIF = (
     '.'
     + os.sep
     + 'tests'
     + os.sep
     + 'files'
     + os.sep
-    + 'sample-cucaracha-gray-white-bg-rot-minus10d.png'
+    + 'sample-cucaracha-gray-white-bg-rot-minus10d.tif'
+)
+SAMPLE_CUCARACHA_GRAY_ROT_PLUS90_TIF = (
+    '.'
+    + os.sep
+    + 'tests'
+    + os.sep
+    + 'files'
+    + os.sep
+    + 'sample-cucaracha-gray-white-bg-plus90.tif'
+)
+SAMPLE_CUCARACHA_RGB_ROT_PLUS90_PNG = (
+    '.'
+    + os.sep
+    + 'tests'
+    + os.sep
+    + 'files'
+    + os.sep
+    + 'sample-cucaracha-rgb-white-bg-plus90.png'
 )
