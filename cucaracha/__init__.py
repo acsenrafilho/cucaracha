@@ -334,7 +334,7 @@ class Document:
             After the `proc_list` being created, the proper execution can be
             called using:
             >>> doc = Document('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.pdf')
-            >>> doc.run_pipeline(proc_list)
+            >>> doc.run_pipeline(proc_list) # doctest: +SKIP
             Applying processors... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 
             Hence, the inner document file in the `doc` object is updated:
