@@ -25,7 +25,9 @@ def inplane_deskew(input: np.ndarray, max_skew=10):
     height, width = input.shape[0], input.shape[1]
 
     # Create a grayscale image and denoise it
-    im_gs = cv.cvtColor(input, cv.COLOR_BGR2GRAY)
+    im_gs = input
+    if len(im_gs.shape) == 3:
+        im_gs = cv.cvtColor(input, cv.COLOR_BGR2GRAY)
     im_gs = cv.fastNlMeansDenoising(im_gs, h=3)
 
     # Create an inverted B&W copy using Otsu (automatic) thresholding
