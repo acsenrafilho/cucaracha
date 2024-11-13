@@ -84,10 +84,6 @@ class Document:
 
         The user can choose the file format by defining on it's naming
 
-        Examples:
-            >>> doc = Document('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.jpg')
-            >>> doc.save_document(os.sep+'tmp'+os.sep+'doc.pdf')
-
         The conversion if based on the file format. If the `.pdf` extension
         is passed, then the PyMuPDF constructor ir used. If an image file is
         passed, e.g. `.jpg`, `.png` and so on, the OpenCV constructor is used.
