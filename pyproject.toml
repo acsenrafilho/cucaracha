@@ -5,12 +5,27 @@ description = "Mr. Franz Cucaracha will be glad to assist you to the document an
 authors = ["Antonio Senra Filho <acsenrafilho@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+classifiers = [
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[tool.poetry.urls]
+"Documentation" = "https://cucaracha.readthedocs.io/en/latest/"
+"Code" = "https://github.com/acsenrafilho/cucaracha"
+"Code Issues" = "https://github.com/acsenrafilho/cucaracha/issues"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 numpy = "^1.22.4"
 rich = "^13.9.3"
 opencv-python = "^4.10.0.84"
+pymupdf = "^1.24.13"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -37,6 +52,10 @@ docs = "mkdocs serve"
 pre_test="task lint"
 test = "pytest --ignore-glob='./cucaracha/scripts/*.py' -s -x --cov=cucaracha -vv"
 post_test = "coverage html"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "--doctest-modules"
 
 [build-system]
 requires = ["poetry-core"]
