@@ -22,6 +22,8 @@ Inspired by Franz Kafka's infamous character, Gregor Samsa — an ordinary man w
 
 The major objective of this project is to offer an accessible, open-source alternative for processing document files, which provides document processing and analysis algorithms to simplify tasks that would traditionally be time-consuming or challenging to automate. 
 
+Check it out all the public datasets and ML models used in this project located at Kaggle - [Cucaracha Project](https://www.kaggle.com/organizations/cucaracha-project)
+
 ### Why `cucaracha`?
 
 The name `cucaracha` reflects the tireless, behind-the-scenes nature of the tool. Like Kafka's transformed character, Mr. Cucaracha deals with the mundanity and bureaucracy often present in document processing tasks. He's designed to tackle these repetitive and complex tasks with minimal oversight, ensuring efficient and structured data extraction without the typical hurdles of document handling.
