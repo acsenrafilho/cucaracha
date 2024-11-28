@@ -1,5 +1,28 @@
 import os
 
+# Root teste files folder
+ROOT_TEST_FOLDER = '.' + os.sep + 'tests' + os.sep + 'files' + os.sep
+
+# ML datasets
+DOC_ML_DATASET_KEYPOINTS = (
+    '.'
+    + os.sep
+    + 'tests'
+    + os.sep
+    + 'files'
+    + os.sep
+    + 'docs-keypoints-dataset'
+)
+DOC_ML_DATASET_CLASSIFICATION = (
+    '.'
+    + os.sep
+    + 'tests'
+    + os.sep
+    + 'files'
+    + os.sep
+    + 'docs-classification-dataset'
+)
+
 # Sample text without noise
 SAMPLE_TEXT_JPG = (
     '.' + os.sep + 'tests' + os.sep + 'files' + os.sep + 'sample-text-en.jpg'
@@ -117,4 +140,45 @@ SAMPLE_CUCARACHA_RGB_ROT_PLUS90_PNG = (
     + 'files'
     + os.sep
     + 'sample-cucaracha-rgb-white-bg-plus90.png'
+)
+
+# Samples of real documents
+SAMPLE_DOC_1_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_1.jpg'
+)
+SAMPLE_DOC_2_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_2.jpg'
+)
+SAMPLE_DOC_3_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_3.jpg'
+)
+SAMPLE_DOC_4_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_4.jpg'
+)
+SAMPLE_DOC_5_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_5.jpg'
+)
+SAMPLE_DOC_6_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_6.jpg'
+)
+SAMPLE_DOC_7_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_7.jpg'
+)
+SAMPLE_DOC_8_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_8.jpg'
+)
+SAMPLE_DOC_9_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_9.jpg'
+)
+SAMPLE_DOC_10_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_10.jpg'
+)
+SAMPLE_DOC_11_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_11.jpg'
+)
+SAMPLE_DOC_12_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_12.jpg'
+)
+SAMPLE_DOC_13_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_13.jpg'
 )
