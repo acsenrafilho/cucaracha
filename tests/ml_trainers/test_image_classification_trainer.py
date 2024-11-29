@@ -29,7 +29,7 @@ def test_train_model_success():
     obj.batch_size = 1
     obj.train_model()
 
-    assert obj.model.history.history['acc'][0] > 0
+    assert obj.model.history.history['acc'][0] > 0.0
 
 
 def test_image_classification_trainer_raises_error_when_architecture_is_not_ModelArchitect_class():
