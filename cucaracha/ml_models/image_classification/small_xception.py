@@ -5,6 +5,24 @@ from cucaracha.ml_models.model_architect import ModelArchitect
 
 
 class SmallXception(ModelArchitect):
+    """
+    SmallXception is a custom model architecture for image classification tasks,
+    inheriting from the ModelArchitect base class. This model is a smaller version
+    of the Xception architecture, designed to be lightweight and efficient for
+    smaller datasets or less computationally intensive tasks.
+
+    Attributes:
+        img_shape (tuple): The shape of the input images (height, width).
+        num_classes (int): The number of output classes for classification.
+
+    Methods:
+        get_model():
+            Builds and returns the Keras model based on the SmallXception architecture.
+        __str__():
+            Returns a string representation of the model, including a summary of the
+            model architecture with trainable parameters.
+    """
+
     def __init__(self, **kwargs):
         super().__init__(modality='image_classification', **kwargs)
         self.img_shape = kwargs.get('img_shape')
