@@ -36,6 +36,8 @@ def load_cucaracha_dataset(dataset_path: str):
     with open(label_studio_json, 'r') as f:
         dataset = json.load(f)
 
+    class_names = prepare_image_classification_dataset(dataset_path, dataset)
+
     # Copy images to appropriate label folders
     for item in dataset:
         img_filename = item['data']['img'].split(os.sep)[-1]
@@ -63,7 +65,7 @@ def load_cucaracha_dataset(dataset_path: str):
             if not os.path.exists(dst_path):
                 os.symlink(src_path, dst_path)
 
-    return train_dataset, dataset
+    return train_dataset, class_names
 
 
 def prepare_image_classification_dataset(dataset_path: str, json_data: json):

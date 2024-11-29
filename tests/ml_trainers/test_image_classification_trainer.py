@@ -11,7 +11,7 @@ from tests import sample_paths as sp
 
 
 def test_load_dataset_success():
-    obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 4)
+    obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 3)
     dataset = obj.load_dataset()
 
     assert dataset['train'] is not None and dataset['val'] is not None
