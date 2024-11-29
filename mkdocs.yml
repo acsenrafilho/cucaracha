@@ -46,6 +46,8 @@ nav:
   - 'api/threshold.md'
   - 'api/aligment.md'
   - 'api/noise_removal.md'
+  - 'api/ml_models/image_classification/small_xception.md'
+  - 'api/ml_trainers/image_classification_trainer.md'
   - 'contribute.md'
 
 plugins:
