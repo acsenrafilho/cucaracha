@@ -17,4 +17,4 @@ class ModelArchitect(ABC):
         pass
 
     def __str__(self):
-        print(f'Model Architecture: {self.__name__}')
+        return f'Model Architecture modality: {self.modality}'
