@@ -85,9 +85,14 @@ class ImageClassificationTrainer(MLPattern):
             self.architecture = kwargs['architecture']
             self.model = self.architecture.get_model()
 
-        self.loss = keras.losses.CategoricalCrossentropy(from_logits=True)
+        # if binary classification, use binary metrics
+        if self.num_classes == 2:
+            self.loss = keras.losses.BinaryCrossentropy(from_logits=True)
+            self.metrics = [keras.metrics.BinaryAccuracy(name='acc')]
+        else:
+            self.loss = keras.losses.CategoricalCrossentropy(from_logits=True)
+            self.metrics = [keras.metrics.CategoricalAccuracy(name='acc')]
         self.optmizer = keras.optimizers.Adam(1e-4)
-        self.metrics = [keras.metrics.CategoricalAccuracy(name='acc')]
 
         self.dataset = self.load_dataset()
 
