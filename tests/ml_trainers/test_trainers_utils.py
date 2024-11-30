@@ -9,6 +9,7 @@ from cucaracha.ml_trainers.utils import (
     _check_dataset_folder_permissions,
     _check_paths,
     load_cucaracha_dataset,
+    verify_image_compatibility,
 )
 
 
@@ -66,3 +67,46 @@ def test_check_dataset_folder_permissions_raise_errors():
         e.value
     )
     os.rmdir(folder_path)
+
+
+def test_verify_image_compatibility_no_incompatible_images(tmp_path):
+    path = os.path.join(sp.DOC_ML_DATASET_CLASSIFICATION, 'raw_data')
+    result = verify_image_compatibility(path)
+
+    # Assert no incompatible images found
+    assert result == []
+
+
+def test_verify_image_compatibility_with_incompatible_images(tmp_path):
+    # Create a temporary directory with an incompatible image
+    img_dir = tmp_path / 'images'
+    img_dir.mkdir()
+    img_path = img_dir / 'image1.txt'
+    img_path.write_text('This is not an image file.')
+
+    # Run the function
+    result = verify_image_compatibility(img_dir)
+
+    # Assert the incompatible image is found
+    assert len(result) == 1
+    assert 'image1.txt' in result[0]
+
+
+def test_verify_image_compatibility_empty_directory(tmp_path):
+    # Create an empty temporary directory
+    img_dir = tmp_path / 'images'
+    img_dir.mkdir()
+
+    # Run the function
+    result = verify_image_compatibility(img_dir)
+
+    # Assert no incompatible images found
+    assert result == []
+
+
+def test_verify_image_compatibility_non_existent_directory():
+    # Run the function with a non-existent directory
+    result = verify_image_compatibility('non_existent_directory')
+
+    # Assert no incompatible images found
+    assert result == []
