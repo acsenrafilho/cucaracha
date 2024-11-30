@@ -28,6 +28,7 @@ opencv-python = "^4.10.0.84"
 pymupdf = "^1.24.13"
 tensorflow = "2.16.2"
 tensorflow-io-gcs-filesystem = "0.37.1"
+kagglehub = "^0.3.4"
 
 
 [tool.poetry.group.dev.dependencies]
