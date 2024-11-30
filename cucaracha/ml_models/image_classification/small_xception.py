@@ -64,7 +64,6 @@ class SmallXception(ModelArchitect):
 
         x = layers.GlobalAveragePooling2D()(x)
 
-
         x = layers.Dropout(0.25)(x)
         outputs = layers.Dense(self.num_classes, activation='softmax')(x)
 
