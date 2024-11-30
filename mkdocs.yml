@@ -42,6 +42,7 @@ nav:
   - 'index.md'
   - 'installation_guide.md'
   - 'faq.md'
+  - 'getting_started.md'
   - 'api/document.md'
   - 'api/threshold.md'
   - 'api/aligment.md'
