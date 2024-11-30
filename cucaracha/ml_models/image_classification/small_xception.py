@@ -63,14 +63,10 @@ class SmallXception(ModelArchitect):
         x = layers.Activation('relu')(x)
 
         x = layers.GlobalAveragePooling2D()(x)
-        if self.num_classes == 2:
-            units = 1
-        else:
-            units = self.num_classes
+
 
         x = layers.Dropout(0.25)(x)
-        # We specify activation=None so as to return logits
-        outputs = layers.Dense(units, activation='softmax')(x)
+        outputs = layers.Dense(self.num_classes, activation='softmax')(x)
 
         return keras.Model(inputs, outputs)
 
