@@ -120,7 +120,7 @@ dataset = trainer.load_dataset()
 ```
 
 !!! note
-    The call of `load_dataet()` is automatically made when an `ml_trainers` class is instanciated. However, if you want to evaluate the training dataset directly, you can used the direct call as given at the example to obtain the training data at your hands.
+    The call of `load_dataset()` is automatically made when an `ml_trainers` class is instanciated. However, if you want to evaluate the training dataset directly, you can used the direct call as given at the example to obtain the training data at your hands.
 
 6. Training the Model
 Train the model using the train_model method. You can also provide custom callbacks if needed:
@@ -172,7 +172,7 @@ trainer.train_model()
 trainer.model.save('path/to/save/your_model.keras')
 ```
 
-Additional Information
+Additional Information:
 
 - The `ml_trainers` module provides essential methodologies for training machine learning models tailored to specific modalities.
 - The `ml_models` module includes various model architectures that can be used for different machine learning tasks.
