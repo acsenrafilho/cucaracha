@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cucaracha"
-version = "0.3.0"
+version = "0.4.0"
 description = "Mr. Franz Cucaracha will be glad to assist you to the document analysis and processing routine"
 authors = ["Antonio Senra Filho <acsenrafilho@gmail.com>"]
 license = "MIT"
