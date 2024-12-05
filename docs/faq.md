@@ -1,8 +1,8 @@
 # Frequently Asked Questions (FAQ)
 
-Here it is a compreensive, but not an exaustive, list of questions that may appear in using or developing with `asltk` library.
+Here it is a compreensive, but not an exaustive, list of questions that may appear in using or developing with `cucaracha` library.
 
-If your doubt is not found in this page, please be free to open an [Issue](https://github.com/LOAMRI/asltk/issues/new/choose) at the GitHub project page.
+If your doubt is not found in this page, please be free to open an [Issue](https://github.com/acsenrafilho/cucaracha/issues/new/choose) at the GitHub project page.
 
 <details>
   <summary>How do I install the `cucaracha` library?</summary>
@@ -13,7 +13,7 @@ If your doubt is not found in this page, please be free to open an [Issue](https
   pip install cucaracha 
   ```
   
-  For more detailed instructions, refer to the Installation Guide
+  For more detailed instructions, refer to the Installation Guide.
 </details>
 
 <details>
@@ -27,7 +27,7 @@ If your doubt is not found in this page, please be free to open an [Issue](https
 </details>
 
 <details>
-  <summary>I’m getting a “ModuleNotFoundError” when trying to import asltk. What should I do?</summary>
+  <summary>I’m getting a “ModuleNotFoundError” when trying to import cucaracha. What should I do?</summary>
   
   Make sure that `cucaracha` is installed correctly. Run the following command to verify installation:
 
@@ -40,7 +40,7 @@ If your doubt is not found in this page, please be free to open an [Issue](https
 
 
 <details>
-  <summary>How can I update ``cucaracha` to the latest version?</summary>
+  <summary>How can I update `cucaracha` to the latest version?</summary>
   
   You can update the library by running:
 
