@@ -8,10 +8,7 @@ import tensorflow as tf
 from cucaracha.ml_models.image_classification import SmallXception
 from cucaracha.ml_models.model_architect import ModelArchitect
 from cucaracha.ml_trainers.ml_pattern import MLPattern
-from cucaracha.ml_trainers.utils import (
-    load_cucaracha_dataset,
-    prepare_image_classification_dataset,
-)
+from cucaracha.ml_trainers.utils import load_cucaracha_dataset
 
 
 class ImageClassificationTrainer(MLPattern):
