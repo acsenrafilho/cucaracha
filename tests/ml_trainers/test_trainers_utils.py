@@ -15,7 +15,8 @@ from cucaracha.ml_trainers.utils import (
 
 def test_load_cucaracha_dataset_success():
     ds_path, annot_json = load_cucaracha_dataset(
-        sp.DOC_ML_DATASET_CLASSIFICATION
+        sp.DOC_ML_DATASET_CLASSIFICATION,
+        'image_classification',
     )
     assert 'organized_data' in ds_path
     assert all(

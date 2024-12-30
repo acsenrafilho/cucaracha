@@ -135,7 +135,9 @@ class ImageClassificationTrainer(MLPattern):
 
         # Prepare all the dataset environment
         # Create subfolders for each label
-        train_dataset, class_names = load_cucaracha_dataset(self.dataset_path)
+        train_dataset, class_names = load_cucaracha_dataset(
+            self.dataset_path, 'image_classification'
+        )
 
         # Load the organized data using keras.utils.image_dataset_from_directory
         train_ds, val_ds = keras.utils.image_dataset_from_directory(

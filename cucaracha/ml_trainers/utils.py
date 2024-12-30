@@ -3,8 +3,10 @@ import os
 
 import tensorflow as tf
 
+from cucaracha.ml_models import CUCARACHA_MODELS
 
-def load_cucaracha_dataset(dataset_path: str):
+
+def load_cucaracha_dataset(dataset_path: str, dataset_type: str):
     """
     Load and organize the Cucaracha dataset from the given path. A `cucaracha`
     dataset is generally organized in the following way:
@@ -28,53 +30,13 @@ def load_cucaracha_dataset(dataset_path: str):
     Raises:
         ValueError: If the source path for an image is not found.
     """
+    if dataset_type not in CUCARACHA_MODELS.keys():
+        raise ValueError(
+            f"Dataset type '{dataset_type}' is not supported. Supported types are: {list(CUCARACHA_MODELS.keys())}"
+        )
 
-    # Load raw data, json file and create organized data
-    raw_data_folder = os.path.join(dataset_path, 'raw_data')
-    label_studio_json = os.path.join(dataset_path, 'label_studio_export.json')
-    train_dataset = os.path.join(dataset_path, 'organized_data')
-
-    # Load the cucaracha label_studio_export.json file
-    with open(label_studio_json, 'r') as f:
-        dataset = json.load(f)
-
-    class_names = prepare_image_classification_dataset(dataset_path, dataset)
-
-    # Copy images to appropriate label folders
-    for item in dataset:
-        img_filename = item['data']['img'].split(os.sep)[-1]
-
-        src_path = ''
-        matching_files = [
-            f for f in os.listdir(raw_data_folder) if f in img_filename
-        ]
-        if matching_files:
-            src_path = os.path.join(raw_data_folder, matching_files[0])
-
-        if not src_path or not _check_tensorflow_image(src_path):
-            RuntimeWarning(
-                f'Image path not found or not compatible to tensorflow: {img_filename}. Skipping...'
-            )
-            continue
-
-        if os.path.exists(src_path):
-            try:
-                annotation = item['annotations'][0]['result']
-                label = annotation[0]['value']['choices'][0]
-
-                # for label in labels:
-                dst_path = os.path.join(
-                    dataset_path, 'organized_data', label, matching_files[0]
-                )
-                if not os.path.exists(dst_path):
-                    os.symlink(src_path, dst_path)
-            except IndexError as e:
-                Warning(
-                    f'Annotation does not found to file {src_path} Warning: {e}'
-                )
-                continue
-
-    return train_dataset, class_names
+    if dataset_type == 'image_classification':
+        return _load_image_classification_dataset(dataset_path)
 
 
 def prepare_image_classification_dataset(dataset_path: str, json_data: json):
@@ -171,3 +133,52 @@ def _check_dataset_folder_permissions(datataset_path: str):
         raise PermissionError(
             f'You do not have permission to write in {datataset_path}.'
         )
+
+
+def _load_image_classification_dataset(dataset_path: str):
+    # Load raw data, json file and create organized data
+    raw_data_folder = os.path.join(dataset_path, 'raw_data')
+    label_studio_json = os.path.join(dataset_path, 'label_studio_export.json')
+    train_dataset = os.path.join(dataset_path, 'organized_data')
+
+    # Load the cucaracha label_studio_export.json file
+    with open(label_studio_json, 'r') as f:
+        dataset = json.load(f)
+
+    class_names = prepare_image_classification_dataset(dataset_path, dataset)
+
+    # Copy images to appropriate label folders
+    for item in dataset:
+        img_filename = item['data']['img'].split(os.sep)[-1]
+
+        src_path = ''
+        matching_files = [
+            f for f in os.listdir(raw_data_folder) if f in img_filename
+        ]
+        if matching_files:
+            src_path = os.path.join(raw_data_folder, matching_files[0])
+
+        if not src_path or not _check_tensorflow_image(src_path):
+            RuntimeWarning(
+                f'Image path not found or not compatible to tensorflow: {img_filename}. Skipping...'
+            )
+            continue
+
+        if os.path.exists(src_path):
+            try:
+                annotation = item['annotations'][0]['result']
+                label = annotation[0]['value']['choices'][0]
+
+                # for label in labels:
+                dst_path = os.path.join(
+                    dataset_path, 'organized_data', label, matching_files[0]
+                )
+                if not os.path.exists(dst_path):
+                    os.symlink(src_path, dst_path)
+            except IndexError as e:
+                Warning(
+                    f'Annotation does not found to file {src_path} Warning: {e}'
+                )
+                continue
+
+    return train_dataset, class_names
