@@ -69,7 +69,7 @@ def test_image_classification_trainer_raises_error_when_architecture_is_not_imag
 
     assert (
         e.value.args[0]
-        == 'The provided modality is not valid for image classification tasks.'
+        == 'The provided modality is not valid for image_classification task.'
     )
 
 
@@ -83,7 +83,7 @@ def test_image_classification_trainer_raises_error_modality_out_of_list():
 
     assert (
         e.value.args[0]
-        == f'The provided modality is not valid for image classification tasks.'
+        == f'The provided modality is not valid for image_classification task.'
     )
 
 
@@ -100,7 +100,7 @@ def test_image_classification_trainer_raises_error_modality_out_of_list():
 
     assert (
         e.value.args[0]
-        == 'The provided modality is not valid for image classification tasks.'
+        == 'The provided modality is not valid for image_classification task.'
     )
 
 
