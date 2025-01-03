@@ -11,15 +11,15 @@ git clone git@github.com:<YOUR_USERNAME>/cucaracha.git
 Where `<YOUR_USERNAME>` indicates your GitHub account that has the repository fork.
 
 !!! tip
-    See more details on [GitHub](https://docs.github.com/pt/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) for forking a repository
+    See more details on [GitHub](https://docs.github.com/pt/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) for forking a repository.
 
 After the repository been set in your local machine, the following setup steps can be done to prepare the coding environment:
 
 !!! warning
-    We assume the Poetry tool for project management, then make sure that the Poetry version is 1.8 or above. See more information about [Poetry installation](https://python-poetry.org/docs/#installing-with-pipx)
+    We assume the Poetry tool for project management, then make sure that the Poetry version is 1.8 or above. See more information about [Poetry installation](https://python-poetry.org/docs/#installing-with-pipx).
 
 ```bash
-cd asltk
+cd cucaracha
 poetry shell && poetry install
 ```
 
@@ -50,7 +50,7 @@ We assume the following list of developing, testing and documentation tools:
 9. mkdocs-material
 10. pymdown-extensions
 
-Further adjustments in the set of tools for the project can be modified in the future. However, the details about these modifications are directly reported in new releases, regarding the specific tool versioning (more details at Version Control section)
+Further adjustments in the set of tools for the project can be modified in the future. However, the details about these modifications are directly reported in new releases, regarding the specific tool versioning (more details at Version Control section).
 
 ## Code Structure
 
@@ -74,7 +74,7 @@ classDiagram
   }
 ```
 
-Where the `Documen` class informs the basic data structure for the document file representation. All the others files are Python modules that contains the image processing methods represented by unique functions.
+Where the `Document` class informs the basic data structure for the document file representation. All the others files are Python modules that contains the image processing methods represented by unique functions.
 
 !!! note
     The general structure to be followed to create an image processing method is using the pattern: i) input = numpy array, ii) output = a tuple with the first item as a numpy array (data output) and the second item as a dictionary informing any additional output parameter that the function may offer.
@@ -88,9 +88,9 @@ Where the `Documen` class informs the basic data structure for the document file
 Another coding pattern expected in new contributions in the `cucaracha` library is the uses of unit tests. 
 
 !!! info
-    A good way to implement test together with coding steps is using a Test-Driven Desing (TDD). Further details can be found at [TDD tutorial](https://codefellows.github.io/sea-python-401d2/lectures/tdd_with_pytest.html) and in many other soruces on internet
+    A good way to implement test together with coding steps is using a Test-Driven Design (TDD). Further details can be found at [TDD tutorial](https://codefellows.github.io/sea-python-401d2/lectures/tdd_with_pytest.html) and in many other sources on internet.
 
-Each module or class implemented in the `cucaracha` library should have a series of tests to ensure the quality of the coding and more stability for production usage. We adopted the Python `codecov` tool to help in collecting the code coverage status, which can be accessed by the HTML page that is generated on the call
+Each module or class implemented in the `cucaracha` library should have a series of tests to ensure the quality of the coding and more stability for production usage. We adopted the Python `codecov` tool to help in collecting the code coverage status, which can be accessed by the HTML page that is generated on the call.
 
 ```bash
 task test
@@ -98,7 +98,7 @@ task test
 
 ## Code Documentation
 
-The coding documentation pattern is the [Google Docstring](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
+The coding documentation pattern is the [Google Docstring](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
 
 Please, provide as much details as possible in the methods, classes and modules implemented in the `cucaracha` library. By the way, if one may want to get deeper in the explanation of some functionality, then use the documentation webpage itself, which can be easier to add figures, graphs, diagrams and much more simple to read.
 
@@ -106,7 +106,7 @@ Please, provide as much details as possible in the methods, classes and modules 
     As a good form to assist further users is providing `Examples` in the Google Docstring format. Then, when it is possible, add a few examples in the code documentation. 
 
 !!! info
-    The docstring also passes to a test analysis, then take care about adding `Examples` in the docstring, respecting the same usage pattern for input/output as the code provides
+    The docstring also passes to a test analysis, then take care about adding `Examples` in the docstring, respecting the same usage pattern for input/output as the code provides.
 
 ## Version Control
 
@@ -122,7 +122,7 @@ Another important consideration is that the `cucaracha` repository has two perma
 
 ### Extending core functionalities
 
-If you want to provide a new functionality in the `cucaracha`, e.g. a new class that supports a novel ASL processing method, please keep the same data and coding structure as described in the `Code Structure` section.
+If you want to provide a new functionality in the `cucaracha`, e.g. a new class that supports a novel processing method, please keep the same data and coding structure as described in the `Code Structure` section.
 
 Any new ideas to improve the project readbility and coding organization is also welcome. If it is the case, please raise a new issue ticket at GitHub, using the Feature option to open an community debate about your suggestion. Once it is approved, a new project version is release with the new implementations glued in the core code.
 
@@ -140,4 +140,4 @@ In this way, you can share a code that can be called for a specific execution an
     Feel free to get inspired adding new scripts in the `cucaracha` project. A quick way to get this is simply making a copy of an existing python script and making your specific modifications.
 
 !!! info
-    We adopted the general Python `Argparse` scripting module to create a standarized code. More details on how to use it can be found at the [official documentation](https://docs.python.org/3/library/argparse.html)
+    We adopted the general Python `Argparse` scripting module to create a standarized code. More details on how to use it can be found at the [official documentation](https://docs.python.org/3/library/argparse.html).

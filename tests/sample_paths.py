@@ -22,6 +22,15 @@ DOC_ML_DATASET_CLASSIFICATION = (
     + os.sep
     + 'docs-classification-dataset'
 )
+SAMPLE_ML_DATASET_SEGMENTATION = (
+    '.'
+    + os.sep
+    + 'tests'
+    + os.sep
+    + 'files'
+    + os.sep
+    + 'sample-segmentation-dataset'
+)
 
 # Sample text without noise
 SAMPLE_TEXT_JPG = (

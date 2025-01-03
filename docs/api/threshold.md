@@ -1,4 +1,4 @@
-This module is dedicated to algorithms that performs color thresholding
+This module is dedicated to algorithms that performs color thresholding.
 
 All the methods has a pattern to be an image filter, i.e. all the method 
 must have an image as input and offer at least one image as output.

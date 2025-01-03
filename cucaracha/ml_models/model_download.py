@@ -1,19 +1,19 @@
 import kagglehub
 
-from cucaracha.ml_models import CUCARACHA_MODELS
+from cucaracha.ml_models import CUCARACHA_PRESETS
 
 
 def download_cucaracha_model(model_url: str):
     """
     Downloads a Cucaracha model from the given URL.
-    This function checks if the provided model URL is present in the CUCARACHA_MODELS dictionary.
+    This function checks if the provided model URL is present in the CUCARACHA_PRESETS dictionary.
     If the URL is valid, it attempts to download the model using the kagglehub library.
 
     The downloaded files are located in the home/.cache folder.
 
     Note:
         We used the kagglehub library to make all the operations here. The
-        CUCARACHA_MODELS dictionary is expected to have a nested structure where
+        CUCARACHA_PRESETS dictionary is expected to have a nested structure where
         the model variations are stored under a 'variation' key. If the URL is
         valid, it attempts to download the model using the kagglehub library.
 
@@ -22,15 +22,22 @@ def download_cucaracha_model(model_url: str):
     Returns:
         str: The path where the model is downloaded.
     Raises:
-        ValueError: If the model URL is not present in CUCARACHA_MODELS or if there is an error during download.
+        ValueError: If the model URL is not present in CUCARACHA_PRESETS or if there is an error during download.
     """
 
-    for url in CUCARACHA_MODELS.values():
+    found = False
+    for url in CUCARACHA_PRESETS.values():
         for item in url.values():
-            if not model_url in item['variation']:
-                raise ValueError(
-                    f'Model URL {model_url} is not present in CUCARACHA_MODELS'
-                )
+            if model_url in item['variation']:
+                found = True
+                break
+        if found:
+            break
+
+    if not found:
+        raise ValueError(
+            f'Model URL {model_url} is not present in CUCARACHA_PRESETS'
+        )
 
     try:
         path = kagglehub.model_download(model_url)
@@ -48,7 +55,7 @@ def download_cucaracha_dataset(dataset_url: str):
 
     Note:
         We used the kagglehub library to make all the operations here. The
-        CUCARACHA_MODELS dictionary is expected to have a nested structure where
+        CUCARACHA_PRESETS dictionary is expected to have a nested structure where
         the model variations are stored under a 'variation' key. If the URL is
         valid, it attempts to download the model using the kagglehub library.
 
