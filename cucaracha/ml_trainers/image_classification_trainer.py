@@ -7,7 +7,10 @@ import tensorflow as tf
 
 from cucaracha.ml_models.image_classification import SmallXception
 from cucaracha.ml_models.model_architect import ModelArchitect
-from cucaracha.ml_trainers.ml_pattern import MLPattern
+from cucaracha.ml_trainers.ml_pattern import (
+    MLPattern,
+    check_architecture_pattern,
+)
 from cucaracha.ml_trainers.utils import load_cucaracha_dataset
 
 
@@ -44,27 +47,7 @@ class ImageClassificationTrainer(MLPattern):
         """
 
         super().__init__(dataset_path)
-        if kwargs.get('architecture') and not isinstance(
-            kwargs.get('architecture'), ModelArchitect
-        ):
-            raise ValueError(
-                'The provided architecture is not a valid ModelArchitect instance.'
-            )
-        if (
-            kwargs.get('architecture')
-            and kwargs.get('architecture').modality != 'image_classification'
-        ):
-            raise ValueError(
-                'The provided modality is not valid for image classification tasks.'
-            )
-
-        if (
-            kwargs.get('architecture')
-            and kwargs['architecture'].modality != 'image_classification'
-        ):
-            raise ValueError(
-                'The provided architecture is not an ImageClassificationArchitect instance.'
-            )
+        check_architecture_pattern(kwargs, 'image_classification')
 
         self.num_classes = num_classes
         self.img_shape = kwargs.get('img_shape', (128, 128))
