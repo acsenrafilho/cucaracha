@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from cucaracha.ml_models import CUCARACHA_MODELS
+from cucaracha.ml_models import CUCARACHA_PRESETS
 from cucaracha.ml_models.model_download import (
     download_cucaracha_dataset,
     download_cucaracha_model,
@@ -10,7 +10,7 @@ from cucaracha.ml_models.model_download import (
 
 
 def test_download_cucaracha_model_success():
-    model_url = CUCARACHA_MODELS['image_classification']['doc_is_signed'][
+    model_url = CUCARACHA_PRESETS['image_classification']['doc_is_signed'][
         'variation'
     ]
     path = download_cucaracha_model(model_url)
@@ -34,3 +34,16 @@ def test_download_cucaracha_model_none_url():
     none_url = None
     with pytest.raises(TypeError):
         download_cucaracha_model(none_url)
+
+
+def test_download_cucaracha_dataset_success():
+    dataset_url = CUCARACHA_PRESETS['image_classification']['doc_is_signed']
+    path = download_cucaracha_dataset(dataset_url['dataset'])
+
+    assert path is not None
+
+
+def test_download_cucaracha_dataset_raise_error_wrong_url():
+    wrong_url = 'wrong-url.com/dataset'
+    with pytest.raises(ValueError):
+        download_cucaracha_dataset(wrong_url)
