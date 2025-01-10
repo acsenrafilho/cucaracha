@@ -200,3 +200,14 @@ SAMPLE_DOC_12_JPG = (
 SAMPLE_DOC_13_JPG = (
     '.' + os.sep + 'tests' + os.sep + 'doc_samples' + os.sep + 'doc_13.jpg'
 )
+
+# Sample personal documents
+SAMPLE_CNH_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'files' + os.sep + 'cnh_sample.jpg'
+)
+SAMPLE_RG_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'files' + os.sep + 'rg_sample.jpg'
+)
+SAMPLE_CPF_JPG = (
+    '.' + os.sep + 'tests' + os.sep + 'files' + os.sep + 'cpf_sample.jpg'
+)
