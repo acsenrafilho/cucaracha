@@ -55,7 +55,7 @@ lint = "blue . && isort ."
 docs = "mkdocs serve"
 pre_test="task lint"
 test = "pytest --ignore-glob='./cucaracha/scripts/*.py' -s -x --cov=cucaracha -vv"
-post_test = "coverage html"
+post_test = "coverage html && find ./tests -type f -name '*.keras' -delete"
 
 [tool.pytest.ini_options]
 pythonpath = "."
