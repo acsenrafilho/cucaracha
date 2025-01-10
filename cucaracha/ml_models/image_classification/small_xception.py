@@ -70,5 +70,6 @@ class SmallXception(ModelArchitect):
         return keras.Model(inputs, outputs)
 
     def __str__(self):
-        super().__str__()
+        output = super().__str__()
         self.get_model().summary(show_trainable=True)
+        return output
