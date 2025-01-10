@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 
 from cucaracha import Document
-from cucaracha.aligment import inplane_deskew
-from cucaracha.noise_removal import sparse_dots
-from cucaracha.threshold import otsu
+from cucaracha.tasks.aligment import inplane_deskew
+from cucaracha.tasks.noise_removal import sparse_dots
+from cucaracha.tasks.threshold import otsu
 from tests import sample_paths
 
 
