@@ -17,6 +17,15 @@ def test_load_dataset_success():
     assert dataset['train'] is not None and dataset['val'] is not None
 
 
+def test_load_dataset_success_with_organized_folder():
+    obj = ImageClassificationTrainer(
+        sp.DOC_ML_DATASET_CLASSIFICATION_ORGANIZED, 3
+    )
+    dataset = obj.load_dataset()
+
+    assert dataset['train'] is not None and dataset['val'] is not None
+
+
 def test_get_model_returns_Keras_model_success():
     obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 4)
 
@@ -30,6 +39,36 @@ def test_train_model_success():
     obj.train_model()
 
     assert obj.model.history.history['acc'][0] > 0.0
+
+
+def test_batch_size_parameter_changed():
+    obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 3)
+    assert obj.batch_size == 64
+    obj.batch_size = 16
+
+    assert obj.batch_size == 16
+
+
+def test_batch_size_parameter_changed_from_constructor():
+    obj = ImageClassificationTrainer(
+        sp.DOC_ML_DATASET_CLASSIFICATION, 3, batch_size=16
+    )
+    assert obj.batch_size == 16
+
+
+def test_epochs_parameter_changed():
+    obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 3)
+    assert obj.epochs == 500
+    obj.epochs = 10
+
+    assert obj.epochs == 10
+
+
+def test_epochs_parameter_changed_from_constructor():
+    obj = ImageClassificationTrainer(
+        sp.DOC_ML_DATASET_CLASSIFICATION, 3, epochs=10
+    )
+    assert obj.epochs == 10
 
 
 def test_image_classification_trainer_raises_error_when_architecture_is_not_ModelArchitect_class():
@@ -112,3 +151,14 @@ def test_model_name_parameter_changed():
     )
 
     assert obj.model_name == 'new_model_name'
+
+
+def test_class_names_collected_successfully():
+    obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 3)
+    obj.load_dataset()
+
+    assert obj.class_names is not None
+    assert len(obj.class_names) == 3
+    assert 'law' in list(obj.class_names.values())
+    assert 'receipt' in list(obj.class_names.values())
+    assert 'form' in list(obj.class_names.values())
