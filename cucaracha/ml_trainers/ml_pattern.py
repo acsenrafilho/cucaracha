@@ -2,10 +2,7 @@ import os
 from abc import ABC, abstractmethod
 
 from cucaracha.ml_models.model_architect import ModelArchitect
-from cucaracha.ml_trainers.utils import (
-    _check_dataset_folder_permissions,
-    _check_paths,
-)
+from cucaracha.utils import _check_dataset_folder_permissions, _check_paths
 
 
 class MLPattern(ABC):
