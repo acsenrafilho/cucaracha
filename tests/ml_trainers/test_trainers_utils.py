@@ -4,7 +4,7 @@ import sys
 import pytest
 
 import tests.sample_paths as sp
-from cucaracha.ml_trainers.utils import (
+from cucaracha.utils import (
     _check_dataset_folder,
     _check_dataset_folder_permissions,
     _check_paths,
