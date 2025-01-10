@@ -17,28 +17,18 @@ def call_cucacha_image_task(
     """
     Processes an input image using a pre-trained model specified by the document preset.
 
-    Examples:
-        >>> import numpy as np
-        >>> from cucaracha.tasks import call_cucacha_image_task
-        >>> input_image = np.random.rand(224, 224, 3)  # Example input image
-        >>> label, extra = call_cucacha_image_task(input_image, doc_preset='cnh_cpf_rg', auto_fit=True)
-        >>> isinstance(label, str)
-        True
-        >>> isinstance(extra, dict)
-        True
-
     Note:
         This method is directly oriented to image classification tasks. To see
-        what the presets availble to be used in this method, check the 
-        `cucaracha.ml_models.CUCARACHA_PRESETS` variable and the list of 
+        what the presets availble to be used in this method, check the
+        `cucaracha.ml_models.CUCARACHA_PRESETS` variable and the list of
         `image_classification` keys.
 
     Info:
         For the `auto_fit` option, If the input image is not consistent to the
-        ML model input shape, then the method will fit it before prediction. 
+        ML model input shape, then the method will fit it before prediction.
         If the user does not want this behavior, e.g. one may want to already
         provide an input data with the correct shape, then the user should set
-        `auto_fit` to `False`. 
+        `auto_fit` to `False`.
 
     Args:
         input (np.ndarray): The image to be used in the ML model.
