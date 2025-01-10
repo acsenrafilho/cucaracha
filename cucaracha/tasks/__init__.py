@@ -14,6 +14,44 @@ CLASSIFICATION_PRESETS = list(CUCARACHA_PRESETS['image_classification'].keys())
 def call_cucacha_image_task(
     input: np.ndarray, doc_preset: str = 'cnh_cpf_rg', auto_fit: bool = True
 ):
+    """
+    Processes an input image using a pre-trained model specified by the document preset.
+
+    Examples:
+        >>> import numpy as np
+        >>> from cucaracha.tasks import call_cucacha_image_task
+        >>> input_image = np.random.rand(224, 224, 3)  # Example input image
+        >>> label, extra = call_cucacha_image_task(input_image, doc_preset='cnh_cpf_rg', auto_fit=True)
+        >>> isinstance(label, str)
+        True
+        >>> isinstance(extra, dict)
+        True
+
+    Note:
+        This method is directly oriented to image classification tasks. To see
+        what the presets availble to be used in this method, check the 
+        `cucaracha.ml_models.CUCARACHA_PRESETS` variable and the list of 
+        `image_classification` keys.
+
+    Info:
+        For the `auto_fit` option, If the input image is not consistent to the
+        ML model input shape, then the method will fit it before prediction. 
+        If the user does not want this behavior, e.g. one may want to already
+        provide an input data with the correct shape, then the user should set
+        `auto_fit` to `False`. 
+
+    Args:
+        input (np.ndarray): The image to be used in the ML model.
+        doc_preset (str, optional): Cucaracha preset to be used. Defaults to 'cnh_cpf_rg'.
+        auto_fit (bool, optional): Fits the input shape to ML model needs. Defaults to True.
+
+    Raises:
+        FileNotFoundError: If the preset is not located in the cucaracha models
+        ValueError: Input shape does not match the model input shape. Only raised when `auto_fit` is False.
+
+    Returns:
+        tuple: The predicted label and extra information.
+    """
     _check_input(input)
     _check_doc_preset(doc_preset)
 
