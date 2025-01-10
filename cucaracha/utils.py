@@ -138,9 +138,28 @@ def _check_dataset_folder_permissions(datataset_path: str):
 
 
 def _load_image_classification_dataset(dataset_path: str):
-    # Load raw data, json file and create organized data
+    class_names = []
+    train_dataset = dataset_path
+
+    # Assumes there are raw data folder and label studio json file
     raw_data_folder = os.path.join(dataset_path, 'raw_data')
     label_studio_json = os.path.join(dataset_path, 'label_studio_export.json')
+
+    # Check if the dataset is already organized
+    if not os.path.exists(raw_data_folder) or not os.path.exists(
+        label_studio_json
+    ):
+        subfolders = [f.path for f in os.scandir(dataset_path) if f.is_dir()]
+        if len(subfolders) <= 1:
+            raise ValueError(
+                f'Not enough folders to describe a classification task in {dataset_path}.'
+            )
+        class_names = [os.path.basename(folder) for folder in subfolders]
+
+        # Return the dataset path if it is already organized
+        return train_dataset, class_names
+
+    # Continue with the organization process
     train_dataset = os.path.join(dataset_path, 'organized_data')
 
     # Load the cucaracha label_studio_export.json file
