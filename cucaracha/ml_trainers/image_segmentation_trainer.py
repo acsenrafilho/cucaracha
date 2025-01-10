@@ -11,7 +11,7 @@ from cucaracha.ml_trainers.ml_pattern import (
     MLPattern,
     check_architecture_pattern,
 )
-from cucaracha.ml_trainers.utils import load_cucaracha_dataset
+from cucaracha.utils import load_cucaracha_dataset
 
 
 class ImageSegmentationTrainer(MLPattern):
