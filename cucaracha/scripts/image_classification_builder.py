@@ -159,7 +159,10 @@ model_save_full_path = os.path.join(args.out_folder, trainer.model_name)
 trainer.model.save(model_save_full_path)
 # Save the class labels as a JSON file
 
-class_labels_path = os.path.join(args.out_folder, 'class_labels.json')
+model_name_without_extension = os.path.splitext(trainer.model_name)[0]
+class_labels_path = os.path.join(
+    args.out_folder, f'{model_name_without_extension}_class_labels.json'
+)
 with open(class_labels_path, 'w') as f:
     json.dump(trainer.class_names, f)
 
