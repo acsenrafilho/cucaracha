@@ -22,6 +22,15 @@ DOC_ML_DATASET_CLASSIFICATION = (
     + os.sep
     + 'docs-classification-dataset'
 )
+DOC_ML_DATASET_CLASSIFICATION_ORGANIZED = (
+    '.'
+    + os.sep
+    + 'tests'
+    + os.sep
+    + 'files'
+    + os.sep
+    + 'docs-classification-dataset-organized'
+)
 SAMPLE_ML_DATASET_SEGMENTATION = (
     '.'
     + os.sep
