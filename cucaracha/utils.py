@@ -42,6 +42,7 @@ def load_cucaracha_dataset(dataset_path: str, dataset_type: str):
 
 
 def prepare_image_classification_dataset(dataset_path: str, json_data: json):
+    # TODO Verify if this function will be public or private... is there an application for this function outside this module?
     label_set = set()
     for item in json_data:
         for annotation in item['annotations'][0]['result']:
