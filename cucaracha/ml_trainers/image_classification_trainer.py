@@ -11,7 +11,7 @@ from cucaracha.ml_trainers.ml_pattern import (
     MLPattern,
     check_architecture_pattern,
 )
-from cucaracha.ml_trainers.utils import load_cucaracha_dataset
+from cucaracha.utils import load_cucaracha_dataset
 
 
 class ImageClassificationTrainer(MLPattern):
@@ -37,10 +37,16 @@ class ImageClassificationTrainer(MLPattern):
             be defined based on the classes presented in the dataset.
             **kwargs: Additional keyword arguments for configuring the model.
             Possible keys include:
-                - 'img_shape' (tuple): The shape of the input images. Default
-                is (128, 128).
-                - 'architecture' (object): The model architecture to use. If
-                not provided, a default SmallXception architecture will be used.
+            - 'img_shape' (tuple): The shape of the input images. Default
+            is (128, 128).
+            - 'architecture' (object): The model architecture to use. If
+            not provided, a default SmallXception architecture will be used.
+            - 'batch_size' (int): The batch size to use during training. If
+            not provided, a default value from MLPattern class  will be used.
+            - 'epochs' (int): The number of epochs to train the model. If
+            not provided, a default value from MLPattern class will be used.
+            - 'model_name' (str): The name to use when saving the trained
+            model. If not provided, a default name will be generated.
         Raises:
             ValueError: If the provided architecture is not for image
             classification tasks.
@@ -55,6 +61,30 @@ class ImageClassificationTrainer(MLPattern):
         self.architecture = None
         self.model = None
         # If no architecture is provided, use the default one
+        self._initialize_model(kwargs.get('architecture'), kwargs)
+
+        # if binary classification, use binary metrics
+        self._initialize_metrics()
+
+        # if batch size and epochs are not provided, use the default values
+        if kwargs.get('batch_size') is not None:
+            self.batch_size = kwargs.get('batch_size')
+
+        if kwargs.get('epochs') is not None:
+            self.epochs = kwargs.get('epochs')
+
+        self.dataset = self.load_dataset()
+
+        # Define the default model name to save
+        self._define_model_name(kwargs)
+
+    def _initialize_model(self, architecture: ModelArchitect, kwargs):
+        """
+        Initialize the model using the provided architecture.
+
+        Args:
+            architecture (ModelArchitect): The model architecture to use.
+        """
         if kwargs.get('architecture') is None:
             default = SmallXception(
                 img_shape=self.img_shape, num_classes=self.num_classes
@@ -65,18 +95,19 @@ class ImageClassificationTrainer(MLPattern):
             self.architecture = kwargs['architecture']
             self.model = self.architecture.get_model()
 
-        # if binary classification, use binary metrics
+    def _initialize_metrics(self):
+        """
+        Initialize the metrics based on the number of classes.
+        """
         if self.num_classes == 2:
-            self.loss = keras.losses.BinaryCrossentropy(from_logits=True)
+            self.loss = keras.losses.BinaryCrossentropy()
             self.metrics = [keras.metrics.BinaryAccuracy(name='acc')]
         else:
-            self.loss = keras.losses.CategoricalCrossentropy(from_logits=True)
+            self.loss = keras.losses.CategoricalCrossentropy()
             self.metrics = [keras.metrics.CategoricalAccuracy(name='acc')]
         self.optmizer = keras.optimizers.Adam(1e-4)
 
-        self.dataset = self.load_dataset()
-
-        # Define the default model name to save
+    def _define_model_name(self, kwargs):
         time = datetime.datetime.now().strftime('%d%m%Y-%H%M%S')
         ds_name = os.path.basename(os.path.normpath(self.dataset_path))
         modality = self.architecture.modality
@@ -133,6 +164,9 @@ class ImageClassificationTrainer(MLPattern):
             seed=random.randint(0, 10000),
         )
 
+        self.class_names = {
+            i: name for i, name in enumerate(train_ds.class_names)
+        }
         num_classes = len(class_names)
         train_ds = train_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
         val_ds = val_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
