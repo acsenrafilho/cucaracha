@@ -5,7 +5,7 @@ from cucaracha.tasks import call_cucacha_image_task
 
 def identify_personal_document(input: np.array, auto_fit: bool = True):
     """
-    Identify the personal document type from an image, seting the document 
+    Identify the personal document type from an image, seting the document
     type based on the Brazilian personal documents such as CNH, CPF and RG.
 
     If the document is not identified as CNH, CPF or RG, the method will return
@@ -18,17 +18,17 @@ def identify_personal_document(input: np.array, auto_fit: bool = True):
         as CNH, CPF or RG.
 
     Note:
-        The method assumed that the input image is taken considering the 
-        majority of the image space of being as the document itself. Images 
-        with partial document or with a lot of noise may not be correctly 
+        The method assumed that the input image is taken considering the
+        majority of the image space of being as the document itself. Images
+        with partial document or with a lot of noise may not be correctly
         identified.
 
     Info:
         For the `auto_fit` option, If the input image is not consistent to the
-        ML model input shape, then the method will fit it before prediction. 
+        ML model input shape, then the method will fit it before prediction.
         If the user does not want this behavior, e.g. one may want to already
         provide an input data with the correct shape, then the user should set
-        `auto_fit` to `False`. 
+        `auto_fit` to `False`.
 
     Args:
         input (np.array): An image representing the personal document.
@@ -55,10 +55,10 @@ def identify_document_is_signed(input: np.array, auto_fit: bool = True):
 
     Info:
         For the `auto_fit` option, If the input image is not consistent to the
-        ML model input shape, then the method will fit it before prediction. 
+        ML model input shape, then the method will fit it before prediction.
         If the user does not want this behavior, e.g. one may want to already
         provide an input data with the correct shape, then the user should set
-        `auto_fit` to `False`. 
+        `auto_fit` to `False`.
 
     Args:
         input (np.array): An image representing the document with or without a signature.
