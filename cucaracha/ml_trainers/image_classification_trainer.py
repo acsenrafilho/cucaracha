@@ -3,7 +3,10 @@ import os
 import random
 
 import keras
+# from keras.preprocessing.image import ImageDataGenerator
+
 import tensorflow as tf
+from keras import layers
 
 from cucaracha.ml_models.image_classification import SmallXception
 from cucaracha.ml_models.model_architect import ModelArchitect
@@ -55,8 +58,10 @@ class ImageClassificationTrainer(MLPattern):
         super().__init__(dataset_path)
         check_architecture_pattern(kwargs, 'image_classification')
 
-        self.num_classes = num_classes
         self.img_shape = kwargs.get('img_shape', (128, 128))
+        self.batch_size = kwargs.get('batch_size', 64)
+        self.epochs = kwargs.get('epochs', 500)
+        self.num_classes = num_classes
 
         self.architecture = None
         self.model = None
@@ -66,17 +71,36 @@ class ImageClassificationTrainer(MLPattern):
         # if binary classification, use binary metrics
         self._initialize_metrics()
 
-        # if batch size and epochs are not provided, use the default values
-        if kwargs.get('batch_size') is not None:
-            self.batch_size = kwargs.get('batch_size')
-
-        if kwargs.get('epochs') is not None:
-            self.epochs = kwargs.get('epochs')
-
+        self.data_generator = self._create_data_generator(kwargs.get('data_augmentation'))
         self.dataset = self.load_dataset()
 
         # Define the default model name to save
         self._define_model_name(kwargs)
+
+    def _create_data_generator(self, layers_list: list = None):
+        """
+        Create a data generator for data augmentation.
+
+        This is a data augmentation based on the Keras augmentation layers.
+        If none is providaded, then a default data augmentation is used by the 
+        RandAugment layer.
+
+        Returns:
+            augmenter: A data augmentation generator.
+        """
+        data_aug = layers_list
+        if data_aug is None:
+            data_aug = [
+                layers.RandAugment(value_range=(0, 255), num_ops=5, factor=0.2),
+            ]
+
+        def augmenter(images):
+            for op in data_aug:
+                images = op(images)
+
+            return images
+        
+        return augmenter
 
     def _initialize_model(self, architecture: ModelArchitect, kwargs):
         """
@@ -117,7 +141,7 @@ class ImageClassificationTrainer(MLPattern):
         if 'model_name' in kwargs:
             self.model_name = kwargs['model_name']
 
-    def load_dataset(self):
+    def load_dataset(self, use_data_augmentation: bool = True):
         """
         Loads and prepares the image classification dataset for training and
         validation.
@@ -168,12 +192,17 @@ class ImageClassificationTrainer(MLPattern):
             i: name for i, name in enumerate(train_ds.class_names)
         }
         num_classes = len(class_names)
-        train_ds = train_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
-        val_ds = val_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
+
+        if use_data_augmentation:
+            train_ds = train_ds.map(lambda x, y: (self.data_generator(x), tf.one_hot(y, num_classes)))
+            val_ds = val_ds.map(lambda x, y: (self.data_generator(x), tf.one_hot(y, num_classes)))
+        else:
+            train_ds = train_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
+            val_ds = val_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
 
         return {'train': train_ds, 'val': val_ds}
 
-    def train_model(self, callbacks: list = None):
+    def train_model(self, **kwargs):
         """
         Trains the model using the provided dataset and configuration.
 
@@ -197,6 +226,17 @@ class ImageClassificationTrainer(MLPattern):
             >>> with tempfile.TemporaryDirectory() as tmpdirname: # doctest: +SKIP
             >>>     obj.model.save(os.path.join(tmpdirname, 'saved_model.keras')) # doctest: +SKIP
 
+        As an optional parameter, one can uses the following:
+        - `callbacks` (list): A list of callback instances to apply during 
+        training. This can be any of the callback methods provided by Keras, 
+        such as `EarlyStopping`, `ReduceLROnPlateau`, etc. If not provided, 
+        a default `ModelCheckpoint` callback is used to save the model at the 
+        end of each epoch.
+        - `data_augmentation` (ImageDataGenerator): A data generator for data
+        augmentation using the Keras ImageDataGenerator class. If not provided,
+        the default data augmentation is used as defined in the 
+        `_create_data_generator` method in the constructor class.
+
         Args:
             callbacks (list, optional): A list of callback instances to apply during training.
                         These can be any of the callback methods provided by Keras,
@@ -204,11 +244,12 @@ class ImageClassificationTrainer(MLPattern):
                         If not provided, a default `ModelCheckpoint` callback is used
                         to save the model at the end of each epoch.
         """
-
+        callbacks = kwargs.get('callbacks', [])
         if not callbacks:
             callbacks = [
                 keras.callbacks.ModelCheckpoint(
-                    os.path.join(self.dataset_path, self.model_name),
+                    os.path.join(self.dataset_path, self.model_name),monitor='val_acc',
+        save_best_only=True
                 )
             ]
 
@@ -219,6 +260,17 @@ class ImageClassificationTrainer(MLPattern):
         )
 
         # TODO Verify to usage of data_augmentation directly in fit method (see: https://keras.io/examples/vision/image_classification_from_scratch/)
+        # self.data_generator = kwargs.get('data_augmentation', self.data_generator)
+
+        # train_generator = self.data_generator.flow_from_directory(
+        #     self.dataset_path,
+        #     target_size=self.img_shape,
+        #     batch_size=self.batch_size,
+        # )
+
+
+        
+
         self.model.fit(
             self.dataset['train'],
             epochs=self.epochs,
