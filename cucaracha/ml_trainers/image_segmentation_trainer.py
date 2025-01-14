@@ -7,6 +7,7 @@ from tensorflow import image as tf_image
 from tensorflow import io as tf_io
 
 from cucaracha.ml_models.image_segmentation import UNetXception
+from cucaracha.ml_models.model_architect import ModelArchitect
 from cucaracha.ml_trainers.ml_pattern import (
     MLPattern,
     check_architecture_pattern,
@@ -27,13 +28,30 @@ class ImageSegmentationTrainer(MLPattern):
         check_architecture_pattern(kwargs, 'image_segmentation')
 
         self.img_shape = kwargs.get('img_shape', (160, 160))
-        self.batch_size = kwargs.get('batch_size', 32)
+        self.batch_size = kwargs.get('batch_size', 64)
         self.epochs = kwargs.get('epochs', 500)
         self.num_classes = kwargs.get('num_classes', 2)
-        self.model = None
 
         self.architecture = kwargs.get('architecture', None)
+        self.model = None
         # If no architecture is provided, use the default one
+        self._initialize_model(kwargs.get('architecture'), kwargs)
+
+        # if binary classification, use binary metrics
+        self._initialize_metrics()
+
+        self.dataset = self.load_dataset()
+
+        # Define the default model name to save
+        self._define_model_name(kwargs)
+
+    def _initialize_model(self, architecture: ModelArchitect, kwargs):
+        """
+        Initialize the model using the provided architecture.
+
+        Args:
+            architecture (ModelArchitect): The model architecture to use.
+        """
         if kwargs.get('architecture') is None:
             default = UNetXception(
                 img_shape=self.img_shape, num_classes=self.num_classes
@@ -44,15 +62,19 @@ class ImageSegmentationTrainer(MLPattern):
             self.architecture = kwargs['architecture']
             self.model = self.architecture.get_model()
 
-        self.dataset = self.load_dataset()
-
-        self.loss = keras.losses.SparseCategoricalCrossentropy(
-            from_logits=True
-        )
+    def _initialize_metrics(self):
+        """
+        Initialize the metrics based on the number of classes.
+        """
+        # if self.num_classes == 2:
+        #     self.loss = keras.losses.BinaryCrossentropy()
+        #     self.metrics = [keras.metrics.BinaryAccuracy(name='acc')]
+        # else:
+        self.loss = keras.losses.SparseCategoricalCrossentropy()
         self.metrics = [keras.metrics.SparseCategoricalAccuracy(name='acc')]
         self.optmizer = keras.optimizers.Adam(1e-4)
 
-        # Define the default model name to save
+    def _define_model_name(self, kwargs):
         time = datetime.datetime.now().strftime('%d%m%Y-%H%M%S')
         ds_name = os.path.basename(os.path.normpath(self.dataset_path))
         modality = self.architecture.modality
@@ -84,7 +106,7 @@ class ImageSegmentationTrainer(MLPattern):
             target_img = tf_image.resize(
                 target_img, self.img_shape, method='nearest'
             )
-            target_img = tf_image.convert_image_dtype(target_img, 'uint8')
+            target_img = tf_image.convert_image_dtype(target_img, 'float32')
 
             # # Ground truth labels are 1, 2, 3. Subtract one to make them 0, 1, 2:
             # target_img -= 1
@@ -125,8 +147,8 @@ class ImageSegmentationTrainer(MLPattern):
         if not callbacks:
             callbacks = [
                 keras.callbacks.ModelCheckpoint(
-                    os.path.join(self.dataset_path, self.model_name),
-                    save_best_only=True,
+                    os.path.join(self.dataset_path, self.model_name),monitor='val_acc',
+        save_best_only=True
                 )
             ]
 
