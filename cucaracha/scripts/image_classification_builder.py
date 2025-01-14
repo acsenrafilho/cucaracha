@@ -1,7 +1,9 @@
 import argparse
 import json
 import os
+import numpy as np
 
+import tensorflow as tf
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from rich import print
 
@@ -172,3 +174,4 @@ if args.verbose:
     print(
         f'Model training completed successfully and saved in: {args.out_folder}{trainer.model_name}.'
     )
+print(' --- Script Execution Completed ---')
