@@ -7,6 +7,7 @@ import tensorflow as tf
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from rich import print
 
+from cucaracha.ml_models import image_classification
 from cucaracha.ml_models.image_classification import *
 from cucaracha.ml_trainers import ImageClassificationTrainer
 
@@ -49,7 +50,12 @@ optional.add_argument(
 optional.add_argument(
     '--arch',
     type=str,
-    help='Define the model architecture to be used. If not provided, a default SmallXception architecture will be used. Remember that this must be a valid model architecture for image classification tasks.',
+    help='Define the model architecture to be used. If not provided, a default SmallXception architecture will be used. Remember that this must be a valid model architecture for image classification tasks. If you want to know all the available architectures, please run this script with the --arch_list flag.',
+)
+optional.add_argument(
+    '--arch_list',
+    action='store_true',
+    help='List all the image classification architectures available in the Cucaracha framework.',
 )
 optional.add_argument(
     '--batch_size',
@@ -65,6 +71,14 @@ optional.add_argument(
 )
 
 args = parser.parse_args()
+
+# Execute --arch_list option and exit
+if args.arch_list:
+    print(' --- Image Classification Architectures Available ---')
+    for arch in image_classification.__all__:
+        print(f'Architecture: {arch}')
+    print('Choose one of the above architectures to be used in the script.')
+    exit()
 
 # Script check-up parameters
 def checkUpParameters():
