@@ -126,6 +126,10 @@ if args.verbose:
     print('Epochs: ' + str(args.epochs))
     print('Output folder: ' + args.out_folder)
 
+# Remove any folder called "logs"
+if os.path.exists(os.path.join(args.out_folder, 'logs')):
+    if os.path.isdir(os.path.join(args.out_folder, 'logs')):
+        shutil.rmtree(os.path.join(args.out_folder, 'logs'))
 
 # Step 1: Create the model architecture instance
 model_architecture = SmallXception(
