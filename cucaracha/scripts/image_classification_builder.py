@@ -161,6 +161,34 @@ if args.verbose:
     print(f'Architecture name: {trainer.architecture.__class__.__name__}')
 
 # #Step 3: Train the model
+# Define a custom callback for TensorBoard image visualization
+class ImageLogger(tf.keras.callbacks.Callback):
+    def __init__(self, log_dir, dataset_path, img_shape):
+        super().__init__()
+        self.file_writer = tf.summary.create_file_writer(log_dir)
+        self.dataset_path = dataset_path
+        self.img_shape = img_shape
+
+    def on_epoch_end(self, epoch, logs=None):
+        # Load a batch of images from the training set
+
+        train_images = next(iter(trainer.dataset['train']))[0].numpy()
+        train_images = (train_images * 255).astype(np.uint8)[0:30]
+        train_images = train_images[1:]
+        with self.file_writer.as_default():
+            # Log the images to TensorBoard
+            tf.summary.image(
+                'Training images', train_images, step=epoch, max_outputs=30
+            )
+
+
+# Initialize the custom ImageLogger callback
+image_logger = ImageLogger(
+    log_dir=os.path.join(args.out_folder, 'logs', 'images'),
+    dataset_path=args.dataset_path,
+    img_shape=img_shape,
+)
+
 callback_list = [
     ModelCheckpoint(
         os.path.join(trainer.dataset_path, trainer.model_name),
@@ -171,6 +199,7 @@ callback_list = [
     TensorBoard(
         log_dir=os.path.join(args.out_folder, 'logs'), update_freq='batch'
     ),
+    image_logger,
 ]
 trainer.train_model(callbacks=callback_list)
 
