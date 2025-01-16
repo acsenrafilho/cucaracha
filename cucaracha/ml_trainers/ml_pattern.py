@@ -59,11 +59,3 @@ def check_architecture_pattern(kwargs: dict, model_type=str):
         raise ValueError(
             f'The provided modality is not valid for {model_type} task.'
         )
-
-    if (
-        kwargs.get('architecture')
-        and kwargs['architecture'].modality != model_type
-    ):
-        raise ValueError(
-            f'The provided architecture is not an {model_type} Architect instance.'
-        )
