@@ -1,8 +1,9 @@
 import argparse
 import json
 import os
-import numpy as np
+import shutil
 
+import numpy as np
 import tensorflow as tf
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from rich import print
@@ -24,22 +25,26 @@ optional = parser.add_argument_group(title='Optional parameters')
 required.add_argument(
     '--dataset_path',
     type=str,
+    required=True,
     help='Path to the dataset. This should follow the `cucaracha` dataset folder organization.',
 )
 required.add_argument(
     '--num_classes',
     type=int,
+    required=True,
     help='The number of classes in the dataset. This must be defined based on the classes presented in the dataset.',
 )
 required.add_argument(
     '--img_shape',
     type=str,
+    required=True,
     nargs='+',
     help='The image shape (height, width) to be used in the DL modeling. Pass it separeted by comma.',
 )
 required.add_argument(
     '--out_folder',
     type=str,
+    required=True,
     help='The output folder where the model will be saved.',
 )
 optional.add_argument(
@@ -155,7 +160,7 @@ if args.verbose:
     print(f'Epochs: {trainer.epochs}')
     print(f'Batch size: {trainer.batch_size}')
     print(f'Number of classes: {trainer.num_classes}')
-    print(f'Optmizer: {trainer.optmizer}')
+    print(f'Optmizer: {trainer.optimizer}')
     print(f'Loss: {trainer.loss}')
     print(f'Metrics: {trainer.metrics}')
     print(f'Architecture name: {trainer.architecture.__class__.__name__}')
