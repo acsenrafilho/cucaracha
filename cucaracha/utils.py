@@ -1,6 +1,9 @@
+import itertools
 import json
 import os
 
+import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 
 from cucaracha.ml_models import CUCARACHA_PRESETS
@@ -264,3 +267,103 @@ def _load_image_segmentation_dataset(dataset_path: str):
         dataset.append((img_path, ann_path))
 
     return dataset
+
+
+def plot_confusion_matrix(
+    cm, target_names, title='Confusion matrix', cmap=None, normalize=True
+):
+    """
+    Generates a plot for a given confusion matrix.
+
+    This function takes a confusion matrix from sklearn and generates a visual
+    representation using matplotlib. It can display either raw numbers or
+    normalized proportions.
+
+    Parameters
+    ----------
+    cm : array-like of shape (n_classes, n_classes)
+        Confusion matrix from sklearn.metrics.confusion_matrix.
+
+    target_names : list of str
+        List of class names corresponding to the labels in the confusion matrix.
+        For example: ['high', 'medium', 'low'] or [0, 1, 2]
+
+    title : str, optional, default='Confusion matrix'
+        The text to display at the top of the matrix as a title for the plot.
+
+    cmap : matplotlib colormap, optional, default=None
+        Colormap to be used for the plot. If None, defaults to plt.cm.Blues.
+
+    normalize : bool, optional, default=True
+        If True, the confusion matrix will be normalized to show proportions.
+        If False, the raw numbers will be displayed.
+
+    Returns
+    -------
+    plt : matplotlib.pyplot
+        The plot object for the confusion matrix.
+
+    plot_confusion_matrix(cm=cm,                  # confusion matrix created by
+                          normalize=True,         # show proportions
+                          target_names=y_labels_vals,  # list of names of the classes
+                          title=best_estimator_name)   # title of graph
+
+    References
+    ----------
+    http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+    """
+    if len(target_names) == 0:
+        raise ValueError('Classes list cannot be empty')
+
+    if len(target_names) != cm.shape[0]:
+        raise ValueError(
+            'Number of classes must match the size of the confusion matrix'
+        )
+
+    accuracy = np.trace(cm) / float(np.sum(cm))
+    misclass = 1 - accuracy
+
+    if cmap is None:
+        cmap = plt.get_cmap('Blues')
+
+    plt.figure(figsize=(8, 6))
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+
+    if target_names is not None:
+        tick_marks = np.arange(len(target_names))
+        plt.xticks(tick_marks, target_names, rotation=45)
+        plt.yticks(tick_marks, target_names)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    thresh = cm.max() / 1.5 if normalize else cm.max() / 2
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        if normalize:
+            plt.text(
+                j,
+                i,
+                '{:0.4f}'.format(cm[i, j]),
+                horizontalalignment='center',
+                color='white' if cm[i, j] > thresh else 'black',
+            )
+        else:
+            plt.text(
+                j,
+                i,
+                '{:,}'.format(cm[i, j]),
+                horizontalalignment='center',
+                color='white' if cm[i, j] > thresh else 'black',
+            )
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel(
+        'Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(
+            accuracy, misclass
+        )
+    )
+
+    return plt
