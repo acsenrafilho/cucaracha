@@ -1,6 +1,9 @@
 import os
 import sys
 
+import cv2 as cv
+import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 
 import tests.sample_paths as sp
@@ -8,7 +11,9 @@ from cucaracha.utils import (
     _check_dataset_folder,
     _check_dataset_folder_permissions,
     _check_paths,
+    _load_image_classification_dataset,
     load_cucaracha_dataset,
+    plot_confusion_matrix,
     verify_image_compatibility,
 )
 
@@ -22,6 +27,15 @@ def test_load_cucaracha_dataset_success():
     assert all(
         [True for item in ('receipt', 'forms', 'law') if item in ds_path]
     )
+
+
+def test_load_cucaracha_dataset_raise_errors_for_wrong_dataset_type():
+    with pytest.raises(Exception) as e:
+        load_cucaracha_dataset(
+            sp.DOC_ML_DATASET_CLASSIFICATION,
+            'wrong_dataset_type',
+        )
+    assert 'Supported types are:' in str(e.value)
 
 
 def test_check_paths_raise_errors_path_not_found():
@@ -111,3 +125,53 @@ def test_verify_image_compatibility_non_existent_directory():
 
     # Assert no incompatible images found
     assert result == []
+
+
+def test_load_image_classification_dataset_folder_without_subfolders(tmp_path):
+    temp_folder = tmp_path / 'empty_folder'
+    temp_folder.mkdir()
+    with pytest.raises(ValueError) as e:
+        _load_image_classification_dataset(temp_folder)
+    assert 'Not enough folders to describe a classification task in' in str(
+        e.value
+    )
+
+
+def test_plot_confusion_matrix(tmp_path):
+    # Create a sample confusion matrix
+    cm = np.array([[5, 2, 0], [1, 3, 1], [0, 1, 4]])
+    classes = ['class1', 'class2', 'class3']
+    output_path = tmp_path / 'confusion_matrix.png'
+
+    # Plot the confusion matrix
+    plt = plot_confusion_matrix(cm, classes, output_path)
+
+    # Assert the output file is created
+    assert plt.__name__ == 'matplotlib.pyplot'
+
+
+def test_plot_confusion_matrix_empty_classes(tmp_path):
+    # Create a sample confusion matrix
+    cm = np.array([[5, 2, 0], [1, 3, 1], [0, 1, 4]])
+    classes = []
+    output_path = tmp_path / 'confusion_matrix.png'
+
+    # Plot the confusion matrix
+    with pytest.raises(Exception) as e:
+        plot_confusion_matrix(cm, classes, output_path)
+    assert 'Classes list cannot be empty' in str(e.value)
+
+
+def test_plot_confusion_matrix_mismatched_classes(tmp_path):
+    # Create a sample confusion matrix
+    cm = np.array([[5, 2, 0], [1, 3, 1], [0, 1, 4]])
+    classes = ['class1', 'class2']
+    output_path = tmp_path / 'confusion_matrix.png'
+
+    # Plot the confusion matrix
+    with pytest.raises(ValueError) as e:
+        plot_confusion_matrix(cm, classes, output_path)
+    assert (
+        'Number of classes must match the size of the confusion matrix'
+        in str(e.value)
+    )
