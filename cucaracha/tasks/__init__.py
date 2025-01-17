@@ -1,5 +1,4 @@
 import os
-import warnings
 
 import cv2 as cv
 import numpy as np
@@ -7,6 +6,7 @@ from tensorflow import keras
 
 from cucaracha.ml_models import CUCARACHA_PRESETS
 from cucaracha.ml_models.kaggle_helpers import collect_cucaracha_model
+from cucaracha.utils import image_auto_fit
 
 CLASSIFICATION_PRESETS = list(CUCARACHA_PRESETS['image_classification'].keys())
 
@@ -57,26 +57,16 @@ def call_cucacha_image_task(
 
     # Load the model and labels
     model = keras.models.load_model(model_path)
+    in_model_shape = model.input_shape[1:]
     labels = model_info['labels']
 
     # Prepare the input image to the model input layer
-    in_model_shape = model.input_shape[1:]  # Exclude the batch size
     if input.shape != in_model_shape:
-        warnings.warn(
-            f'Warning: Input shape {input.shape} is different from the model input shape {in_model_shape}.'
-        )
-        if auto_fit:
-            warnings.warn(
-                f'Warning: Auto-fitting the input image to the model input shape {in_model_shape}.'
-            )
-            input_image = cv.resize(
-                input, (in_model_shape[1], in_model_shape[0])
-            )
-            input_image = np.expand_dims(input_image, axis=0)
-        else:
+        if not auto_fit:
             raise ValueError(
                 f'Input shape {input.shape} does not match the model input shape {in_model_shape}.'
             )
+    input_image = image_auto_fit(input, in_model_shape)
 
     prediction = model.predict(input_image)
     prediction_label = labels[np.argmax(prediction)]
