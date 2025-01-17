@@ -147,8 +147,9 @@ class ImageSegmentationTrainer(MLPattern):
         if not callbacks:
             callbacks = [
                 keras.callbacks.ModelCheckpoint(
-                    os.path.join(self.dataset_path, self.model_name),monitor='val_acc',
-        save_best_only=True
+                    os.path.join(self.dataset_path, self.model_name),
+                    monitor='val_acc',
+                    save_best_only=True,
                 )
             ]
 
