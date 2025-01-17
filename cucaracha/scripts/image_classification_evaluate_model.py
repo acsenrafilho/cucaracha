@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import shutil
 
@@ -10,8 +11,6 @@ import seaborn as sns
 import tensorflow as tf
 from rich import print
 from sklearn.metrics import classification_report, confusion_matrix
-
-from cucaracha.utils import plot_confusion_matrix
 
 # Script parameters
 parser = argparse.ArgumentParser(
@@ -35,6 +34,12 @@ required.add_argument(
     required=True,
     help='Path to the model to be evaluated. This must be an image classification model that can be loaded from Keras framework.',
 )
+required.add_argument(
+    '--labels',
+    type=str,
+    required=True,
+    help='Path to the class labels JSON file that is generated from the cucaracha image classification builder script.',
+)
 optional.add_argument(
     '--verbose',
     action='store_true',
@@ -54,38 +59,38 @@ def _create_grid_sample(labels, X_test, y_pred=None):
     # Define the dimensions of the plot grid
     W_grid = 5
     L_grid = 5
+    subsample_size = W_grid * L_grid  # Define the size of the subsample
 
     fig, axes = plt.subplots(L_grid, W_grid, figsize=(17, 17))
     axes = axes.ravel()   # flaten the 15 x 15 matrix into 225 array
 
     # Convert a subsample of evaluate_dataset to a numpy array
-    subsample_size = 25  # Define the size of the subsample
     subsample = evaluate_dataset.take(subsample_size)
 
     X_test = []
     y_true = []
-    for images, tag in subsample:
-        X_test.append(np.array(images.numpy(), dtype=np.uint8))
-        y_true.append(np.argmax(tag, axis=-1))
+    for images, labels in subsample:
+        X_test.append(images.numpy())
+        y_true.extend(labels.numpy())
 
     X_test = np.concatenate(X_test, axis=0)
-    y_true = np.concatenate(y_true, axis=0)
+    # y_true = np.concatenate(y_true, axis=0)
 
-    n_test = len(X_test)   # get the length of the train dataset
+    n_test = subsample_size   # get the length of the train dataset
 
     # Select a random number from 0 to n_train
-    for i in np.arange(0, W_grid * L_grid):   # create evenly spaces variables
+    for i in np.arange(0, subsample_size):   # create evenly spaces variables
 
         # Select a random number
         index = np.random.randint(0, n_test)
         # read and display an image with the selected index
-        axes[i].imshow(X_test[index])
+        axes[i].imshow(X_test[index].astype(np.uint8))
         if y_pred is not None:
             label_index = int(y_pred[index])
-            axes[i].set_title(labels[label_index], fontsize=8)
+            axes[i].set_title(str(int(labels[label_index])), fontsize=8)
         else:
             label_index = int(y_true[index])
-            axes[i].set_title(labels[label_index], fontsize=8)
+            axes[i].set_title(str(int(labels[label_index])), fontsize=8)
         axes[i].axis('off')
 
     plt.subplots_adjust(hspace=0.4)
@@ -134,40 +139,49 @@ evaluate_dataset = keras.utils.image_dataset_from_directory(
     verbose=args.verbose,
 )
 
-class_names = {i: name for i, name in enumerate(evaluate_dataset.class_names)}
-num_classes = len(class_names)
+class_names_json = {}
+try:
+    with open(args.labels, 'r') as f:
+        class_names_json = json.load(f)
+except:
+    raise ValueError(f'Error loading class labels from file: {args.labels}')
+num_classes = len(class_names_json)
 
-evaluate_dataset = evaluate_dataset.map(
-    lambda x, y: (x, tf.one_hot(y, num_classes))
-)
 
-# Predict the classes
-y_pred = tf.one_hot(
-    np.argmax(model.predict(evaluate_dataset), axis=-1), num_classes
-)
-y_true = np.concatenate([y for x, y in evaluate_dataset], axis=0)
+y_pred = []
+y_true = []
+for images, labels in evaluate_dataset:
+    y_true.extend(
+        [
+            list(class_names_json.values()).index(
+                evaluate_dataset.class_names[label]
+            )
+            for label in labels.numpy()
+        ]
+    )
+    preds = model.predict(images)
+    y_pred.extend(np.argmax(preds, axis=-1))
+y_true = np.array(y_true)
+y_pred = np.array(y_pred)
 
 
 # Classification report
 print('Classification Report:')
 report = classification_report(
-    y_true, y_pred, target_names=list(class_names.values())
+    y_true, y_pred, target_names=list(class_names_json.values())
 )
 print(report)
 
 # Confusion matrix
-# Revert one hot encoded y_true and y_pred to label values
-y_true_labels = np.argmax(y_true, axis=-1)
-y_pred_labels = np.argmax(y_pred, axis=-1)
-conf_matrix = confusion_matrix(y_true_labels, y_pred_labels)
+conf_matrix = confusion_matrix(y_true, y_pred)
 plt.figure(figsize=(10, 8))
 sns.heatmap(
     conf_matrix,
     annot=True,
     fmt='d',
     cmap='Blues',
-    xticklabels=list(class_names.values()),
-    yticklabels=list(class_names.values()),
+    xticklabels=list(class_names_json.values()),
+    yticklabels=list(class_names_json.values()),
 )
 plt.xlabel('Predicted')
 plt.ylabel('True')
@@ -188,13 +202,15 @@ with open(classification_report_path, 'w') as f:
 print(f'Classification report saved at: {classification_report_path}')
 
 # Save a grid figure showing some predictions
-grid_plt = _create_grid_sample(list(class_names.values()), evaluate_dataset)
+grid_plt = _create_grid_sample(
+    list(class_names_json.values()), evaluate_dataset
+)
 grid_plt_path = os.path.join(evaluation_folder, 'grid_input_sample.png')
 grid_plt.savefig(grid_plt_path)
 
 y_pred_evaluate = np.argmax(model.predict(evaluate_dataset), axis=-1)
 grid_plt = _create_grid_sample(
-    list(class_names.values()), evaluate_dataset, y_pred_evaluate
+    list(class_names_json.values()), evaluate_dataset, y_pred_evaluate
 )
 grid_plt_path = os.path.join(evaluation_folder, 'grid_prediction_sample.png')
 grid_plt.savefig(grid_plt_path)
