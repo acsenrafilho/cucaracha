@@ -153,7 +153,9 @@ def _load_image_classification_dataset(dataset_path: str):
     if not os.path.exists(raw_data_folder) or not os.path.exists(
         label_studio_json
     ):
-        subfolders = [f.path for f in os.scandir(dataset_path) if f.is_dir()]
+        subfolders = sorted(
+            [f.path for f in os.scandir(dataset_path) if f.is_dir()]
+        )
         if len(subfolders) <= 1:
             raise ValueError(
                 f'Not enough folders to describe a classification task in {dataset_path}.'
