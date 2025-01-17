@@ -1,7 +1,9 @@
 import itertools
 import json
 import os
+import warnings
 
+import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -87,6 +89,37 @@ def verify_image_compatibility(dataset_path: str):
                 incompatible_images.append(file_path)
                 print(f'Incompatible image found: {file_path}')
     return incompatible_images
+
+
+def image_auto_fit(image, target_shape):
+    """
+    Fits an image to the target shape. This method is useful to adjust the
+    image shape to fit the Keras model input shape. The method resizes the image
+    based on the target shape and expands the dimensions to include the batch size.
+
+
+    Examples:
+        >>> import numpy as np
+        >>> image = np.random.rand(100, 100, 3)
+        >>> target_shape = (224, 224, 3)
+        >>> input_image = image_auto_fit(image, target_shape)
+        >>> input_image.shape
+        (1, 224, 224, 3)
+
+    Args:
+        image (_type_): The input image that need to fit the model input shape.
+        target_shape (_type_): The target shape of the model input layer.
+
+    Raises:
+        ValueError: If the input image shape does not match the model input shape.
+
+    Returns:
+        numpy.ndarray: The input image with the correct shape.
+    """
+    input_image = cv.resize(image, (target_shape[1], target_shape[0]))
+    input_image = np.expand_dims(input_image, axis=0)
+
+    return input_image
 
 
 def _check_tensorflow_image(image_path: str):
