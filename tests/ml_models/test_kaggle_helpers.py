@@ -43,6 +43,7 @@ def test_download_cucaracha_dataset_success():
 
     assert path is not None
 
+
 def test_download_cucaracha_dataset_raise_error_wrong_url():
     wrong_url = 'wrong-url.com/dataset'
     with pytest.raises(ValueError):

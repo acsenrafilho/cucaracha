@@ -50,10 +50,12 @@ def test_identify_personal_document_with_valid_preset():
 #     result = identify_personal_document(input_data)
 #     assert result[0] == 'cnh'
 
+
 # def test_identify_personal_document_success_using_rg():
 #     input_data = cv.imread(sp.SAMPLE_RG_JPG)
 #     result = identify_personal_document(input_data)
 #     assert result[0] == 'rg'
+
 
 # def test_identify_personal_document_success_using_cpf():
 #     input_data = cv.imread(sp.SAMPLE_CPF_JPG)
