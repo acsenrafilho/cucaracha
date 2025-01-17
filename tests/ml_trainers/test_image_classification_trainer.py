@@ -28,6 +28,16 @@ def test_load_dataset_success_with_organized_folder():
     assert dataset['train'] is not None and dataset['val'] is not None
 
 
+def test_load_dataset_execute_without_data_augmention():
+    obj = ImageClassificationTrainer(
+        sp.DOC_ML_DATASET_CLASSIFICATION_ORGANIZED,
+        3,
+        use_data_augmentation=False,
+    )
+
+    assert obj.dataset is not None
+
+
 def test_get_model_returns_Keras_model_success():
     obj = ImageClassificationTrainer(sp.DOC_ML_DATASET_CLASSIFICATION, 4)
 
