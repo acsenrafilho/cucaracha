@@ -43,11 +43,19 @@ def test_download_cucaracha_dataset_success():
 
     assert path is not None
 
-
 def test_download_cucaracha_dataset_raise_error_wrong_url():
     wrong_url = 'wrong-url.com/dataset'
     with pytest.raises(ValueError):
         download_cucaracha_dataset(wrong_url)
+
+
+def test_download_cucaracha_model_all_models_are_ok():
+    for modality, presets in CUCARACHA_PRESETS.items():
+        for preset, preset_data in presets.items():
+            model_url = preset_data['variation']
+            path = download_cucaracha_model(model_url)
+
+            assert path is not None
 
 
 def test_collect_cucaracha_model_bad_preset():
