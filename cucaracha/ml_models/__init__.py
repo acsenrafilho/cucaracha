@@ -20,15 +20,9 @@ CUCARACHA_PRESETS = {
             'labels': {0: 'unsigned', 1: 'signed'},
         },
         'cnh_cpf_rg': {
-            'variation': 'cucaracha-project/cucaracha-imgclass-brazilian-personal-document/keras/cucaracha-imgclass-brazilian_personal_doc-v0.1.0',
+            'variation': 'cucaracha-project/cucaracha-imgclass-brazilian-personal-document/keras/cucaracha-imgclass-brazilian-personal-document',
             'dataset': 'cucaracha-project/cucaracha-mod-imgclass-brazilian-personal-doc',
             'labels': {0: 'rg', 1: 'others', 2: 'cpf', 3: 'cnh'},
         },
-    },
-    'image_segmentation': {
-        'TBD': {
-            'variation': 'cucaracha-project/TBD',
-            'dataset': 'cucaracha-project/TBD',
-        }
-    },
+    }
 }
