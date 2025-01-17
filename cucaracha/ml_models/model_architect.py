@@ -14,17 +14,17 @@ class ModelArchitect(ABC):
         __str__():
             Returns a string representation of the model architecture, including its modality.
     """
+
     def __init__(self, **kwargs):
         self.modality = kwargs.get('modality', None)
-        # valid_modalities = ['image_classification', 'image_keypoint_detection', 'image_object_detection']
         if self.modality is None or self.modality not in VALID_MODALITIES:
             raise ValueError(
                 f'Invalid modality. Expected one of {VALID_MODALITIES}, got {self.modality}'
             )
 
     @abstractmethod
-    def get_model(self):
+    def get_model(self):   # pragma: no cover
         pass
 
-    def __str__(self):
+    def __str__(self):   # pragma: no cover
         return f'Model Architecture modality: {self.modality}'
