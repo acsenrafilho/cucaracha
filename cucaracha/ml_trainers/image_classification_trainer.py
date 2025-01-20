@@ -3,6 +3,7 @@ import os
 import random
 
 import keras
+import numpy as np
 import tensorflow as tf
 
 from cucaracha.ml_models.image_classification import SmallXception
@@ -11,7 +12,7 @@ from cucaracha.ml_trainers.ml_pattern import (
     MLPattern,
     check_architecture_pattern,
 )
-from cucaracha.ml_trainers.utils import load_cucaracha_dataset
+from cucaracha.utils import load_cucaracha_dataset
 
 
 class ImageClassificationTrainer(MLPattern):
@@ -37,10 +38,16 @@ class ImageClassificationTrainer(MLPattern):
             be defined based on the classes presented in the dataset.
             **kwargs: Additional keyword arguments for configuring the model.
             Possible keys include:
-                - 'img_shape' (tuple): The shape of the input images. Default
-                is (128, 128).
-                - 'architecture' (object): The model architecture to use. If
-                not provided, a default SmallXception architecture will be used.
+            - 'img_shape' (tuple): The shape of the input images. Default
+            is (128, 128).
+            - 'architecture' (object): The model architecture to use. If
+            not provided, a default SmallXception architecture will be used.
+            - 'batch_size' (int): The batch size to use during training. If
+            not provided, a default value from MLPattern class  will be used.
+            - 'epochs' (int): The number of epochs to train the model. If
+            not provided, a default value from MLPattern class will be used.
+            - 'model_name' (str): The name to use when saving the trained
+            model. If not provided, a default name will be generated.
         Raises:
             ValueError: If the provided architecture is not for image
             classification tasks.
@@ -49,44 +56,34 @@ class ImageClassificationTrainer(MLPattern):
         super().__init__(dataset_path)
         check_architecture_pattern(kwargs, 'image_classification')
 
-        self.num_classes = num_classes
         self.img_shape = kwargs.get('img_shape', (128, 128))
+        self.batch_size = kwargs.get('batch_size', 64)
+        self.epochs = kwargs.get('epochs', 500)
+        self.num_classes = num_classes
 
         self.architecture = None
         self.model = None
         # If no architecture is provided, use the default one
-        if kwargs.get('architecture') is None:
-            default = SmallXception(
-                img_shape=self.img_shape, num_classes=self.num_classes
-            )
-            self.architecture = default
-            self.model = default.get_model()
-        else:
-            self.architecture = kwargs['architecture']
-            self.model = self.architecture.get_model()
+        self._initialize_model(kwargs.get('architecture'), kwargs)
 
         # if binary classification, use binary metrics
-        if self.num_classes == 2:
-            self.loss = keras.losses.BinaryCrossentropy(from_logits=True)
-            self.metrics = [keras.metrics.BinaryAccuracy(name='acc')]
-        else:
-            self.loss = keras.losses.CategoricalCrossentropy(from_logits=True)
-            self.metrics = [keras.metrics.CategoricalAccuracy(name='acc')]
-        self.optmizer = keras.optimizers.Adam(1e-4)
+        self._initialize_metrics(kwargs)
 
-        self.dataset = self.load_dataset()
+        self.data_generator = self._create_data_generator(
+            kwargs.get('data_generator')
+        )
+        self.class_names = {}
+        self.class_weights = {}
+        self.dataset = self.load_dataset(
+            kwargs.get('use_data_augmentation', True)
+        )
 
         # Define the default model name to save
-        time = datetime.datetime.now().strftime('%d%m%Y-%H%M%S')
-        ds_name = os.path.basename(os.path.normpath(self.dataset_path))
-        modality = self.architecture.modality
-        self.model_name = (
-            f'mod-{modality}-dataset-{ds_name}-timestamp-{time}.keras'
-        )
-        if 'model_name' in kwargs:
-            self.model_name = kwargs['model_name']
+        self._define_model_name(kwargs)
 
-    def load_dataset(self):
+        self.history = None
+
+    def load_dataset(self, use_data_augmentation: bool = True):
         """
         Loads and prepares the image classification dataset for training and
         validation.
@@ -118,14 +115,13 @@ class ImageClassificationTrainer(MLPattern):
 
         # Prepare all the dataset environment
         # Create subfolders for each label
-        train_dataset, class_names = load_cucaracha_dataset(
+        train_dataset, _ = load_cucaracha_dataset(
             self.dataset_path, 'image_classification'
         )
 
         # Load the organized data using keras.utils.image_dataset_from_directory
         train_ds, val_ds = keras.utils.image_dataset_from_directory(
             train_dataset,
-            class_names=class_names,
             image_size=self.img_shape,
             batch_size=self.batch_size,
             validation_split=0.2,
@@ -133,13 +129,44 @@ class ImageClassificationTrainer(MLPattern):
             seed=random.randint(0, 10000),
         )
 
-        num_classes = len(class_names)
-        train_ds = train_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
-        val_ds = val_ds.map(lambda x, y: (x, tf.one_hot(y, num_classes)))
+        self.class_names = {
+            i: name for i, name in enumerate(train_ds.class_names)
+        }
 
-        return {'train': train_ds, 'val': val_ds}
+        if use_data_augmentation:
+            train_ds = train_ds.map(
+                lambda x, y: (
+                    self.data_generator(x),
+                    tf.one_hot(y, depth=self.num_classes),
+                )
+            )
+            val_ds = val_ds.map(
+                lambda x, y: (
+                    self.data_generator(x),
+                    tf.one_hot(y, depth=self.num_classes),
+                )
+            )
+        else:
+            train_ds = train_ds.map(
+                lambda x, y: (
+                    x,
+                    tf.one_hot(y, depth=self.num_classes),
+                )
+            )
+            val_ds = val_ds.map(
+                lambda x, y: (
+                    x,
+                    tf.one_hot(y, depth=self.num_classes),
+                )
+            )
 
-    def train_model(self, callbacks: list = None):
+        # Calculate class weights based on the proportions of data in the dataset
+        dataset = {'train': train_ds, 'val': val_ds}
+        self._collect_dataset_class_weigth(dataset)
+
+        return dataset
+
+    def train_model(self, **kwargs):
         """
         Trains the model using the provided dataset and configuration.
 
@@ -163,6 +190,17 @@ class ImageClassificationTrainer(MLPattern):
             >>> with tempfile.TemporaryDirectory() as tmpdirname: # doctest: +SKIP
             >>>     obj.model.save(os.path.join(tmpdirname, 'saved_model.keras')) # doctest: +SKIP
 
+        As an optional parameter, one can uses the following:
+        - `callbacks` (list): A list of callback instances to apply during
+        training. This can be any of the callback methods provided by Keras,
+        such as `EarlyStopping`, `ReduceLROnPlateau`, etc. If not provided,
+        a default `ModelCheckpoint` callback is used to save the model at the
+        end of each epoch.
+        - `data_augmentation` (ImageDataGenerator): A data generator for data
+        augmentation using the Keras ImageDataGenerator class. If not provided,
+        the default data augmentation is used as defined in the
+        `_create_data_generator` method in the constructor class.
+
         Args:
             callbacks (list, optional): A list of callback instances to apply during training.
                         These can be any of the callback methods provided by Keras,
@@ -170,25 +208,172 @@ class ImageClassificationTrainer(MLPattern):
                         If not provided, a default `ModelCheckpoint` callback is used
                         to save the model at the end of each epoch.
         """
-
+        callbacks = kwargs.get('callbacks', [])
         if not callbacks:
             callbacks = [
                 keras.callbacks.ModelCheckpoint(
                     os.path.join(self.dataset_path, self.model_name),
+                    monitor='val_acc',
+                    save_best_only=True,
                 )
             ]
 
         self.model.compile(
-            optimizer=self.optmizer,
+            optimizer=self.optimizer,
             loss=self.loss,
             metrics=self.metrics,
         )
 
-        # TODO Verify to usage of data_augmentation directly in fit method (see: https://keras.io/examples/vision/image_classification_from_scratch/)
-        self.model.fit(
+        self.history = self.model.fit(
             self.dataset['train'],
             epochs=self.epochs,
             callbacks=callbacks,
             batch_size=self.batch_size,
             validation_data=self.dataset['val'],
+            class_weight=self.class_weights,
         )
+
+    def _create_data_generator(self, layers_list: list = None):
+        """
+        Create a data generator for data augmentation.
+
+        This is a data augmentation based on the Keras augmentation layers.
+        If none is providaded, then a default data augmentation is set, which
+        assumes the following layers: RandomFlip, RandomRotation, RandomZoom,
+        RandomShear, and RandomTranslation.
+
+        The user can provide a list of layers to be used in the data
+        augmentation process, however, it must be a list of Keras layers.
+
+        Returns:
+            augmenter: A data augmentation generator.
+        """
+        if layers_list is not None:
+            if not isinstance(layers_list, list) or not all(
+                [
+                    isinstance(layer, keras.layers.Layer)
+                    for layer in layers_list
+                ]
+            ):
+                raise ValueError(
+                    'Data generator must be a list of Keras layers.'
+                )
+
+        data_aug = layers_list
+        if data_aug is None:
+            data_aug = [
+                keras.layers.RandomFlip(),
+                keras.layers.RandomRotation(
+                    0.3,
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
+                ),
+                keras.layers.RandomZoom(
+                    (-0.2, 0.4),
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
+                ),
+                keras.layers.RandomShear(
+                    0.3,
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
+                ),
+                keras.layers.RandomTranslation(
+                    (-0.3, 0.3),
+                    0.1,
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
+                ),
+                keras.layers.RandomBrightness(0.3),
+                keras.layers.GaussianNoise(0.6),
+            ]
+
+        def augmenter(images):
+            for op in data_aug:
+                images = op(images)
+
+            return images
+
+        return augmenter
+
+    def collect_training_samples(self, num_samples: int = 30):
+        """
+        Collects a batch of training samples for visualization purposes.
+
+        Args:
+            num_samples (int, optional): The number of samples to collect.
+            Defaults to 30.
+
+        Returns:
+            np.ndarray: A batch of training samples.
+        """
+        sample = []
+
+        for i in range(num_samples):
+            sample.append(next(iter(self.dataset['train']))[0].numpy())
+            if len(np.concatenate(sample, axis=0)) >= num_samples:
+                break
+        # next(iter(self.dataset['train']))[0].numpy()[0:num_samples]
+        return np.concatenate(sample, axis=0)[:num_samples]
+
+    def _initialize_model(self, architecture: ModelArchitect, kwargs):
+        """
+        Initialize the model using the provided architecture.
+
+        Args:
+            architecture (ModelArchitect): The model architecture to use.
+        """
+        if kwargs.get('architecture') is None:
+            default = SmallXception(
+                img_shape=self.img_shape, num_classes=self.num_classes
+            )
+            self.architecture = default
+            self.model = default.get_model()
+        else:
+            self.architecture = kwargs['architecture']
+            self.model = self.architecture.get_model()
+
+    def _initialize_metrics(self, kwargs):
+        """
+        Initialize the metrics based on the number of classes.
+        """
+        self.loss = kwargs.get('loss', keras.losses.CategoricalCrossentropy())
+        self.metrics = kwargs.get(
+            'metrics', [keras.metrics.CategoricalAccuracy(name='acc')]
+        )
+        self.optimizer = kwargs.get(
+            'optimizer',
+            keras.optimizers.Adam(
+                keras.optimizers.schedules.ExponentialDecay(
+                    initial_learning_rate=0.001,
+                    decay_steps=10,
+                    decay_rate=0.5,
+                )
+            ),
+        )
+
+    def _define_model_name(self, kwargs):
+        time = datetime.datetime.now().strftime('%d%m%Y-%H%M%S')
+        ds_name = os.path.basename(os.path.normpath(self.dataset_path))
+        modality = self.architecture.modality
+        self.model_name = (
+            f'mod-{modality}-dataset-{ds_name}-timestamp-{time}.keras'
+        )
+        if 'model_name' in kwargs:
+            self.model_name = kwargs['model_name']
+
+    def _collect_dataset_class_weigth(self, dataset):
+        """
+        Collects the class weights based on the dataset proportions.
+        This helps to balance the training process when the dataset is
+        unbalanced.
+        """
+        class_counts = np.zeros(self.num_classes)
+        for _, labels in dataset['train']:
+            class_counts += np.sum(labels.numpy(), axis=0)
+
+        total_samples = np.sum(class_counts)
+        self.class_weights = {
+            i: total_samples / (self.num_classes * count)
+            for i, count in enumerate(class_counts)
+        }

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from cucaracha import Document
-from cucaracha.threshold import binary_threshold, otsu
+from cucaracha.tasks.threshold import binary_threshold, otsu
 from tests import sample_paths
 
 

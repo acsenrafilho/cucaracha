@@ -1,6 +1,11 @@
+import itertools
 import json
 import os
+import warnings
 
+import cv2 as cv
+import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 
 from cucaracha.ml_models import CUCARACHA_PRESETS
@@ -42,6 +47,7 @@ def load_cucaracha_dataset(dataset_path: str, dataset_type: str):
 
 
 def prepare_image_classification_dataset(dataset_path: str, json_data: json):
+    # TODO Verify if this function will be public or private... is there an application for this function outside this module?
     label_set = set()
     for item in json_data:
         for annotation in item['annotations'][0]['result']:
@@ -83,6 +89,37 @@ def verify_image_compatibility(dataset_path: str):
                 incompatible_images.append(file_path)
                 print(f'Incompatible image found: {file_path}')
     return incompatible_images
+
+
+def image_auto_fit(image, target_shape):
+    """
+    Fits an image to the target shape. This method is useful to adjust the
+    image shape to fit the Keras model input shape. The method resizes the image
+    based on the target shape and expands the dimensions to include the batch size.
+
+
+    Examples:
+        >>> import numpy as np
+        >>> image = np.random.rand(100, 100, 3)
+        >>> target_shape = (224, 224, 3)
+        >>> input_image = image_auto_fit(image, target_shape)
+        >>> input_image.shape
+        (1, 224, 224, 3)
+
+    Args:
+        image (_type_): The input image that need to fit the model input shape.
+        target_shape (_type_): The target shape of the model input layer.
+
+    Raises:
+        ValueError: If the input image shape does not match the model input shape.
+
+    Returns:
+        numpy.ndarray: The input image with the correct shape.
+    """
+    input_image = cv.resize(image, (target_shape[1], target_shape[0]))
+    input_image = np.expand_dims(input_image, axis=0)
+
+    return input_image
 
 
 def _check_tensorflow_image(image_path: str):
@@ -138,9 +175,30 @@ def _check_dataset_folder_permissions(datataset_path: str):
 
 
 def _load_image_classification_dataset(dataset_path: str):
-    # Load raw data, json file and create organized data
+    class_names = []
+    train_dataset = dataset_path
+
+    # Assumes there are raw data folder and label studio json file
     raw_data_folder = os.path.join(dataset_path, 'raw_data')
     label_studio_json = os.path.join(dataset_path, 'label_studio_export.json')
+
+    # Check if the dataset is already organized
+    if not os.path.exists(raw_data_folder) or not os.path.exists(
+        label_studio_json
+    ):
+        subfolders = sorted(
+            [f.path for f in os.scandir(dataset_path) if f.is_dir()]
+        )
+        if len(subfolders) <= 1:
+            raise ValueError(
+                f'Not enough folders to describe a classification task in {dataset_path}.'
+            )
+        class_names = [os.path.basename(folder) for folder in subfolders]
+
+        # Return the dataset path if it is already organized
+        return train_dataset, class_names
+
+    # Continue with the organization process
     train_dataset = os.path.join(dataset_path, 'organized_data')
 
     # Load the cucaracha label_studio_export.json file
@@ -160,13 +218,15 @@ def _load_image_classification_dataset(dataset_path: str):
         if matching_files:
             src_path = os.path.join(raw_data_folder, matching_files[0])
 
-        if not src_path or not _check_tensorflow_image(src_path):
+        if not src_path or not _check_tensorflow_image(
+            src_path
+        ):   # pragma: no cover
             RuntimeWarning(
                 f'Image path not found or not compatible to tensorflow: {img_filename}. Skipping...'
             )
-            continue
+            continue  # pragma: no cover
 
-        if os.path.exists(src_path):
+        if os.path.exists(src_path):   # pragma: no cover
             try:
                 annotation = item['annotations'][0]['result']
                 label = annotation[0]['value']['choices'][0]
@@ -177,7 +237,7 @@ def _load_image_classification_dataset(dataset_path: str):
                 )
                 if not os.path.exists(dst_path):
                     os.symlink(src_path, dst_path)
-            except IndexError as e:
+            except IndexError as e:   # pragma: no cover
                 Warning(
                     f'Annotation does not found to file {src_path} Warning: {e}'
                 )
@@ -242,3 +302,103 @@ def _load_image_segmentation_dataset(dataset_path: str):
         dataset.append((img_path, ann_path))
 
     return dataset
+
+
+def plot_confusion_matrix(
+    cm, target_names, title='Confusion matrix', cmap=None, normalize=True
+):
+    """
+    Generates a plot for a given confusion matrix.
+
+    This function takes a confusion matrix from sklearn and generates a visual
+    representation using matplotlib. It can display either raw numbers or
+    normalized proportions.
+
+    Parameters
+    ----------
+    cm : array-like of shape (n_classes, n_classes)
+        Confusion matrix from sklearn.metrics.confusion_matrix.
+
+    target_names : list of str
+        List of class names corresponding to the labels in the confusion matrix.
+        For example: ['high', 'medium', 'low'] or [0, 1, 2]
+
+    title : str, optional, default='Confusion matrix'
+        The text to display at the top of the matrix as a title for the plot.
+
+    cmap : matplotlib colormap, optional, default=None
+        Colormap to be used for the plot. If None, defaults to plt.cm.Blues.
+
+    normalize : bool, optional, default=True
+        If True, the confusion matrix will be normalized to show proportions.
+        If False, the raw numbers will be displayed.
+
+    Returns
+    -------
+    plt : matplotlib.pyplot
+        The plot object for the confusion matrix.
+
+    plot_confusion_matrix(cm=cm,                  # confusion matrix created by
+                          normalize=True,         # show proportions
+                          target_names=y_labels_vals,  # list of names of the classes
+                          title=best_estimator_name)   # title of graph
+
+    References
+    ----------
+    http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+    """
+    if len(target_names) == 0:
+        raise ValueError('Classes list cannot be empty')
+
+    if len(target_names) != cm.shape[0]:
+        raise ValueError(
+            'Number of classes must match the size of the confusion matrix'
+        )
+
+    accuracy = np.trace(cm) / float(np.sum(cm))
+    misclass = 1 - accuracy
+
+    if cmap is None:
+        cmap = plt.get_cmap('Blues')
+
+    plt.figure(figsize=(8, 6))
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+
+    if target_names is not None:
+        tick_marks = np.arange(len(target_names))
+        plt.xticks(tick_marks, target_names, rotation=45)
+        plt.yticks(tick_marks, target_names)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    thresh = cm.max() / 1.5 if normalize else cm.max() / 2
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        if normalize:
+            plt.text(
+                j,
+                i,
+                '{:0.4f}'.format(cm[i, j]),
+                horizontalalignment='center',
+                color='white' if cm[i, j] > thresh else 'black',
+            )
+        else:
+            plt.text(
+                j,
+                i,
+                '{:,}'.format(cm[i, j]),
+                horizontalalignment='center',
+                color='white' if cm[i, j] > thresh else 'black',
+            )
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel(
+        'Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(
+            accuracy, misclass
+        )
+    )
+
+    return plt

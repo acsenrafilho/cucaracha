@@ -7,9 +7,9 @@ from pymupdf import Page
 from rich import print
 from rich.progress import track
 
-from cucaracha.aligment import inplane_deskew
-from cucaracha.noise_removal import sparse_dots
-from cucaracha.threshold import otsu
+from cucaracha.tasks.aligment import inplane_deskew
+from cucaracha.tasks.noise_removal import sparse_dots
+from cucaracha.tasks.threshold import otsu
 
 
 class Document:

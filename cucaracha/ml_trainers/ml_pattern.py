@@ -2,10 +2,7 @@ import os
 from abc import ABC, abstractmethod
 
 from cucaracha.ml_models.model_architect import ModelArchitect
-from cucaracha.ml_trainers.utils import (
-    _check_dataset_folder_permissions,
-    _check_paths,
-)
+from cucaracha.utils import _check_dataset_folder_permissions, _check_paths
 
 
 class MLPattern(ABC):
@@ -61,12 +58,4 @@ def check_architecture_pattern(kwargs: dict, model_type=str):
     ):
         raise ValueError(
             f'The provided modality is not valid for {model_type} task.'
-        )
-
-    if (
-        kwargs.get('architecture')
-        and kwargs['architecture'].modality != model_type
-    ):
-        raise ValueError(
-            f'The provided architecture is not an {model_type} Architect instance.'
         )

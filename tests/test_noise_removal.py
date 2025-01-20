@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from cucaracha import Document
-from cucaracha.noise_removal import sparse_dots
+from cucaracha.tasks.noise_removal import sparse_dots
 from tests import sample_paths
 
 
