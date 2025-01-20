@@ -74,6 +74,11 @@ optional.add_argument(
     default=500,
     help='Define the number of epochs to be used in the training process. Default is 500. This must be a positive integer',
 )
+optional.add_argument(
+    '--visualize_samples',
+    action='store_true',
+    help='If this is choosen then a training sample is genereated to be visualized before the training procedure to continure. The user will choose if the traninig can keep going or not.',
+)
 
 args = parser.parse_args()
 
@@ -131,10 +136,11 @@ if args.verbose:
     print('Epochs: ' + str(args.epochs))
     print('Output folder: ' + args.out_folder)
 
-# Remove any folder called "logs"
-if os.path.exists(os.path.join(args.out_folder, 'logs')):
-    if os.path.isdir(os.path.join(args.out_folder, 'logs')):
-        shutil.rmtree(os.path.join(args.out_folder, 'logs'))
+# Remove any folder called "logs" or "sample_visualization" in the output folder
+for folder_name in ['logs', 'sample_visualization']:
+    folder_path = os.path.join(args.out_folder, folder_name)
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        shutil.rmtree(folder_path)
 
 # Step 1: Create the model architecture instance
 model_architecture = SmallXception(
@@ -206,6 +212,33 @@ callback_list = [
     ),
     image_logger,
 ]
+
+if args.visualize_samples:
+    import matplotlib.pyplot as plt
+
+    # Create the sample visualization folder
+    sample_vis_folder = os.path.join(args.out_folder, 'sample_visualization')
+    os.makedirs(sample_vis_folder, exist_ok=True)
+
+    # Load a batch of images from the training set
+    train_images = trainer.collect_training_samples(200)
+    train_images = train_images.astype(np.uint8)
+
+    # Save the images to the sample visualization folder
+    for i in range(len(train_images)):
+        plt.imsave(
+            os.path.join(sample_vis_folder, f'sample_{i}.png'), train_images[i]
+        )
+
+    print(f'Sample images saved to {sample_vis_folder}')
+    user_input = input(
+        '[bold green]Do you want to continue the training? (yes/no): '
+    )
+    if user_input.lower() != 'yes':
+        print('Training stopped by the user.')
+        exit()
+
+
 trainer.train_model(callbacks=callback_list)
 
 # Finish
