@@ -264,17 +264,28 @@ class ImageClassificationTrainer(MLPattern):
             data_aug = [
                 keras.layers.RandomFlip(),
                 keras.layers.RandomRotation(
-                    0.1, fill_mode='constant', fill_value=255
+                    0.3,
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
                 ),
                 keras.layers.RandomZoom(
-                    (-0.2, 0.2), fill_mode='constant', fill_value=255
+                    (-0.2, 0.4),
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
                 ),
                 keras.layers.RandomShear(
-                    0.1, fill_mode='constant', fill_value=255
+                    0.3,
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
                 ),
                 keras.layers.RandomTranslation(
-                    (-0.2, 0.2), 0.1, fill_mode='constant', fill_value=255
+                    (-0.3, 0.3),
+                    0.1,
+                    fill_mode='constant',
+                    fill_value=random.randint(0, 255),
                 ),
+                keras.layers.RandomBrightness(0.3),
+                keras.layers.GaussianNoise(0.6),
             ]
 
         def augmenter(images):
@@ -284,6 +295,26 @@ class ImageClassificationTrainer(MLPattern):
             return images
 
         return augmenter
+
+    def collect_training_samples(self, num_samples: int = 30):
+        """
+        Collects a batch of training samples for visualization purposes.
+
+        Args:
+            num_samples (int, optional): The number of samples to collect.
+            Defaults to 30.
+
+        Returns:
+            np.ndarray: A batch of training samples.
+        """
+        sample = []
+
+        for i in range(num_samples):
+            sample.append(next(iter(self.dataset['train']))[0].numpy())
+            if len(np.concatenate(sample, axis=0)) >= num_samples:
+                break
+        # next(iter(self.dataset['train']))[0].numpy()[0:num_samples]
+        return np.concatenate(sample, axis=0)[:num_samples]
 
     def _initialize_model(self, architecture: ModelArchitect, kwargs):
         """
@@ -316,7 +347,7 @@ class ImageClassificationTrainer(MLPattern):
                 keras.optimizers.schedules.ExponentialDecay(
                     initial_learning_rate=0.001,
                     decay_steps=10,
-                    decay_rate=0.96,
+                    decay_rate=0.5,
                 )
             ),
         )
