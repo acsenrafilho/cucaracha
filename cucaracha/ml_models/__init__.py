@@ -10,7 +10,6 @@ DEFAULT_MODEL_LAKE = os.path.join(
     os.path.expanduser('~'), '.cache', 'kagglehub', 'models'
 )
 
-
 # Pre-treined cucahacha models
 CUCARACHA_PRESETS = {
     'image_classification': {
