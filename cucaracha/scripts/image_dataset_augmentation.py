@@ -1,6 +1,3 @@
-# Make a local data augmentation to create a new dataset
-# Add augmentation using "alpha" expansion of images (other as backgrounda nd class as foreground)
-# Save locally the augmented dataset
 import argparse
 import os
 import shutil
@@ -12,12 +9,11 @@ from keras import layers
 from rich import print
 
 from cucaracha.configuration import ALLOWED_IMAGE_EXTENSIONS
-from cucaracha.utils import verify_image_compatibility
 
 # Script parameters
 parser = argparse.ArgumentParser(
     prog='Image Dataset Agumentation',
-    description='Python script to create a new dataset based on data augmentation.',
+    description='Python script to create a new dataset based on data augmentation. This script creates simulated images locally.',
 )
 parser._action_groups.pop()
 required = parser.add_argument_group(title='Required parameters')
@@ -62,7 +58,14 @@ optional.add_argument(
 args = parser.parse_args()
 
 
-# TODO Colocar check parameters para os inputs do scripts
+def check_parameters():
+    is_ok=True
+
+    # Check if dataset_path exist
+    if not os.path.exists(args.dataset_path):
+        is_ok=False
+
+    return is_ok
 
 
 def _augment_batch_and_save(batch):
@@ -91,6 +94,11 @@ def _augment_batch_and_save(batch):
             continue
 
     return augmented_images
+
+
+if not check_parameters():
+    print('[bold red]Some parameters are not correct. Please check the parameters and try again.')
+    exit(0)
 
 
 fill_value = 0
@@ -141,7 +149,6 @@ if os.path.exists(args.out_folder):
 os.makedirs(args.out_folder)
 
 
-# for bg_root, _, bg_files in bg_collector:
 def _collect_bg_image():
     rand_bg_file = np.random.choice(bg_list)
     bg_path = os.path.join(root, rand_bg_file)
