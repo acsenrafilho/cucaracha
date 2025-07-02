@@ -40,6 +40,8 @@ class Document:
 
         Args:
             doc_path (str, optional): Document path to be loaded. If None, a general object is created with `None` values in metadata information. Defaults to None.
+            resolution (int, optional): DPI resolution to use for document rendering. If None, defaults to 96. Defaults to None.
+            estimate_dpi (bool, optional): Whether to estimate DPI when not provided in headers. Only applies when resolution is not explicitly set. Defaults to False.
         """
         self._doc_metadata = {
             'file_ext': None,
@@ -59,6 +61,20 @@ class Document:
             )
 
         self._collect_inner_metadata(doc_path)
+        
+        # Optionally estimate DPI if requested and resolution wasn't explicitly set
+        if (doc_path is not None and 
+            kwargs.get('estimate_dpi', False) and 
+            kwargs.get('resolution') is None):
+            try:
+                estimated_dpi = self.estimate_dpi()
+                if estimated_dpi != self._doc_metadata['resolution']:
+                    # Re-load document with estimated DPI if it's different
+                    self._doc_metadata['resolution'] = estimated_dpi
+                    self._doc_file = self._read_by_ext(doc_path, dpi=estimated_dpi)
+            except (ValueError, NotImplementedError):
+                # If estimation fails, keep the default DPI
+                pass
 
     def load_document(self, path: str):
         """Load document using a full path.
@@ -405,6 +421,124 @@ class Document:
 
             # Set file number of pages
             self._doc_metadata['pages'] = len(self._doc_file)
+
+    def estimate_dpi(self, method: str = 'auto', assume_a4: bool = True):
+        """Estimate the DPI (dots per inch) of the document when not available in headers.
+        
+        This method provides different approaches to estimate DPI:
+        1. 'auto': Automatically chooses the best method based on file type
+        2. 'page_size': Estimates based on physical page dimensions (assumes A4 by default)
+        3. 'pdf_dimensions': Uses PDF internal page dimensions (PDF files only)
+        
+        Args:
+            method (str): Estimation method to use. Options: 'auto', 'page_size', 'pdf_dimensions'
+            assume_a4 (bool): Whether to assume A4 page size (210 × 297 mm) for page_size method
+            
+        Returns:
+            int: Estimated DPI value
+            
+        Raises:
+            ValueError: If method is not supported or estimation cannot be performed
+            
+        Examples:
+            >>> doc = Document('./tests/files/sample-text-en.pdf')
+            >>> estimated_dpi = doc.estimate_dpi()
+            >>> print(f"Estimated DPI: {estimated_dpi}")
+        """
+        if method == 'auto':
+            # For PDF files, prefer using internal dimensions
+            if self._doc_metadata.get('file_ext') == '.pdf':
+                return self._estimate_dpi_from_pdf_page_size()
+            else:
+                # For image files, use A4 assumption as fallback
+                return self._estimate_dpi_from_page_size(assume_a4)
+        elif method == 'page_size':
+            return self._estimate_dpi_from_page_size(assume_a4)
+        elif method == 'pdf_dimensions':
+            return self._estimate_dpi_from_pdf_page_size()
+        else:
+            raise ValueError(f"Unsupported estimation method: {method}")
+    
+    def _estimate_dpi_from_page_size(self, assume_a4: bool = True):
+        """Estimate DPI based on assumed page size dimensions.
+        
+        Args:
+            assume_a4 (bool): Whether to assume A4 page size (210 × 297 mm)
+            
+        Returns:
+            int: Estimated DPI value
+            
+        Note:
+            This method makes assumptions about the physical size of the document.
+            For small document excerpts or non-standard sizes, the estimate may be inaccurate.
+        """
+        if len(self._doc_file) == 0:
+            raise ValueError("No document loaded for DPI estimation")
+            
+        # Get the first page dimensions in pixels
+        page = self._doc_file[0]
+        height_px, width_px = page.shape[:2]
+        
+        if assume_a4:
+            # A4 dimensions: 210 mm × 297 mm = 8.27 in × 11.69 in
+            a4_width_inch = 210 / 25.4  # Convert mm to inches
+            a4_height_inch = 297 / 25.4
+            
+            # Calculate DPI based on both dimensions and take average
+            dpi_width = width_px / a4_width_inch
+            dpi_height = height_px / a4_height_inch
+            estimated_dpi = int((dpi_width + dpi_height) / 2)
+            
+            # Sanity check: if estimated DPI is too low/high, it's likely not A4
+            if estimated_dpi < 50 or estimated_dpi > 600:
+                # Document likely not A4 sized, return a reasonable default
+                print(f"Warning: Estimated DPI ({estimated_dpi}) seems unrealistic for A4. Document may not be A4 sized.")
+                return 96  # Return reasonable default
+            
+            return estimated_dpi
+        else:
+            raise ValueError("Cannot estimate DPI without size assumptions for image files")
+    
+    def _estimate_dpi_from_pdf_page_size(self):
+        """Estimate DPI from PDF page size using PyMuPDF page dimensions.
+        
+        This method uses the actual page dimensions stored in the PDF file
+        to calculate the DPI based on the pixel dimensions of the rendered page.
+        
+        Returns:
+            int: Estimated DPI value
+        """
+        if self._doc_metadata.get('file_ext') != '.pdf':
+            raise ValueError("This method only works with PDF files")
+            
+        # Re-open the PDF to get page dimensions
+        doc_path = os.path.join(
+            self._doc_metadata.get('file_path'), 
+            self._doc_metadata.get('file_name') + self._doc_metadata.get('file_ext')
+        )
+        
+        doc = pymupdf.open(doc_path)
+        page = doc[0]
+        page_rect = page.rect
+        
+        # Page rect is in points (1/72 inch)
+        page_width_inch = page_rect.width / 72.0
+        page_height_inch = page_rect.height / 72.0
+        
+        # Get pixel dimensions at current DPI
+        page_array = self._doc_file[0]
+        height_px, width_px = page_array.shape[:2]
+        
+        # Calculate actual DPI used during rendering
+        if page_width_inch > 0 and page_height_inch > 0:
+            dpi_width = width_px / page_width_inch
+            dpi_height = height_px / page_height_inch
+            estimated_dpi = int((dpi_width + dpi_height) / 2)
+        else:
+            estimated_dpi = 96  # Fallback to default
+        
+        doc.close()
+        return estimated_dpi
 
     def _check_processor_list(self, processors):
         if type(processors) != list:
