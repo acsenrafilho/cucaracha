@@ -210,8 +210,29 @@ def extract_text_easyocr(input: np.ndarray, lang=['en'], gpu=False):
         return input, extra_info
 
     try:
-        # Initialize EasyOCR reader
-        reader = easyocr.Reader(lang, gpu=gpu)
+        # Initialize EasyOCR reader with timeout protection
+        import signal
+
+        def timeout_handler(signum, frame):
+            raise TimeoutError('EasyOCR initialization timeout')
+
+        # Set a timeout for initialization to avoid hanging in CI environments
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(30)  # 30 second timeout
+
+        try:
+            reader = easyocr.Reader(lang, gpu=gpu)
+            signal.alarm(0)  # Cancel the alarm
+        except TimeoutError:
+            extra_info = {
+                'extracted_text': '',
+                'confidence': 0.0,
+                'word_data': [],
+                'lang': lang,
+                'method': 'easyocr',
+                'error': 'EasyOCR initialization timeout (possibly downloading models)',
+            }
+            return input, extra_info
 
         # Extract text using EasyOCR
         results = reader.readtext(input, detail=1)
