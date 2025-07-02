@@ -9,6 +9,10 @@ from rich.progress import track
 
 from cucaracha.tasks.aligment import inplane_deskew
 from cucaracha.tasks.noise_removal import sparse_dots
+from cucaracha.tasks.text_extraction import (
+    extract_text_simple,
+    extract_text_tesseract,
+)
 from cucaracha.tasks.threshold import otsu
 
 
