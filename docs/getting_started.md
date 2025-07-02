@@ -64,6 +64,36 @@ np.max(out) == 255
 
 This example provides a general idea of how to use the Cucaracha library to work with documents. You can extend this basic functionality to suit your specific needs, such as processing multiple pages or performing image analysis.
 
+### DPI Estimation
+
+The Cucaracha library includes automatic DPI estimation when DPI information is not available in document headers. This is particularly useful for scanned documents or images without embedded resolution metadata.
+
+```python
+from cucaracha import Document
+
+# Basic DPI estimation
+doc = Document('./sample-document.pdf')
+estimated_dpi = doc.estimate_dpi()
+print(f"Estimated DPI: {estimated_dpi}")
+
+# Automatic DPI estimation during document loading
+doc_auto = Document('./sample-document.pdf', estimate_dpi=True)
+print(f"Auto-estimated DPI: {doc_auto.get_metadata('resolution')['resolution']}")
+
+# Different estimation methods
+pdf_dpi = doc.estimate_dpi(method='pdf_dimensions')  # For PDF files
+a4_dpi = doc.estimate_dpi(method='page_size')        # Assumes A4 page size
+```
+
+The DPI estimation supports multiple methods:
+
+- **Auto method**: Automatically chooses the best approach based on file type
+- **PDF dimensions**: Uses internal PDF page dimensions (PDF files only)
+- **Page size**: Estimates based on A4 page size assumptions (210 × 297 mm)
+
+!!! note "DPI Estimation Accuracy"
+    DPI estimation works best with full-page documents. For document excerpts or non-standard page sizes, the library provides reasonable defaults and helpful warnings when assumptions may not apply.
+
 !!! note "Many extension possibilities"
     There are many other applications and algorithms that can be used with the numpy array exposed image (from the obj.get_page() method). Examples can be found in libraries such as OpenCV, SimpleITK, Scikit-Image, Seaborn, Matplotlib, and many others. These libraries offer a wide range of tools for image processing, analysis, and visualization, allowing you to extend the capabilities of the Cucaracha library to meet your specific needs.
 
