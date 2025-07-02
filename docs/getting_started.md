@@ -68,6 +68,8 @@ This example provides a general idea of how to use the Cucaracha library to work
 
 The Cucaracha library includes automatic DPI estimation when DPI information is not available in document headers. This is particularly useful for scanned documents or images without embedded resolution metadata.
 
+#### Basic Usage
+
 ```python
 from cucaracha import Document
 
@@ -76,23 +78,86 @@ doc = Document('./sample-document.pdf')
 estimated_dpi = doc.estimate_dpi()
 print(f"Estimated DPI: {estimated_dpi}")
 
-# Automatic DPI estimation during document loading
-doc_auto = Document('./sample-document.pdf', estimate_dpi=True)
-print(f"Auto-estimated DPI: {doc_auto.get_metadata('resolution')['resolution']}")
-
-# Different estimation methods
-pdf_dpi = doc.estimate_dpi(method='pdf_dimensions')  # For PDF files
-a4_dpi = doc.estimate_dpi(method='page_size')        # Assumes A4 page size
+# Check current DPI and document dimensions
+current_dpi = doc.get_metadata('resolution')['resolution']
+page_shape = doc.get_page(0).shape
+print(f"Current DPI: {current_dpi}")
+print(f"Document shape: {page_shape}")
 ```
 
-The DPI estimation supports multiple methods:
+#### Estimation Methods
 
-- **Auto method**: Automatically chooses the best approach based on file type
-- **PDF dimensions**: Uses internal PDF page dimensions (PDF files only)
+The DPI estimation supports multiple methods, each suited for different scenarios:
+
+```python
+# Auto method - intelligently selects best approach based on file type
+auto_dpi = doc.estimate_dpi(method='auto')
+
+# PDF dimensions method - uses internal PDF page dimensions (PDF files only)
+pdf_dpi = doc.estimate_dpi(method='pdf_dimensions')
+
+# Page size method - assumes A4 page size (210 × 297 mm)
+a4_dpi = doc.estimate_dpi(method='page_size')
+
+print(f"Auto method: {auto_dpi}")
+print(f"PDF dimensions method: {pdf_dpi}")
+print(f"Page size method: {a4_dpi}")
+```
+
+#### Automatic Estimation During Loading
+
+For convenience, you can enable automatic DPI estimation when creating a Document object:
+
+```python
+# Automatically estimate and apply DPI during document loading
+doc_with_estimation = Document('./sample-document.pdf', estimate_dpi=True)
+estimated_resolution = doc_with_estimation.get_metadata('resolution')['resolution']
+print(f"DPI with estimation enabled: {estimated_resolution}")
+print(f"Document shape: {doc_with_estimation.get_page(0).shape}")
+```
+
+#### Working with Different File Types
+
+The estimation approach varies depending on the file type:
+
+```python
+# PDF files - uses internal document dimensions for accuracy
+pdf_doc = Document('./document.pdf')
+pdf_estimated_dpi = pdf_doc.estimate_dpi()
+print(f"PDF DPI estimation: {pdf_estimated_dpi}")
+
+# Image files - uses A4 size assumptions
+img_doc = Document('./scanned-page.jpg')
+img_estimated_dpi = img_doc.estimate_dpi()
+print(f"Image DPI estimation: {img_estimated_dpi}")
+print(f"Image shape: {img_doc.get_page(0).shape}")
+```
+
+#### Resolution Impact Comparison
+
+Different DPI settings significantly affect the output resolution. Here's how various DPI values impact document rendering:
+
+```python
+# Compare different resolution settings
+doc_96 = Document('./sample-document.pdf', resolution=96)
+doc_150 = Document('./sample-document.pdf', resolution=150)  
+doc_300 = Document('./sample-document.pdf', resolution=300)
+
+print(f"96 DPI shape:  {doc_96.get_page(0).shape}")
+print(f"150 DPI shape: {doc_150.get_page(0).shape}")
+print(f"300 DPI shape: {doc_300.get_page(0).shape}")
+```
+
+Higher DPI values result in larger image dimensions, providing more detail but requiring more memory and processing time.
+
+#### Estimation Methods Overview
+
+- **Auto method**: Automatically chooses the best approach based on file type (PDF dimensions for PDFs, page size for images)
+- **PDF dimensions**: Uses internal PDF page dimensions for accurate DPI calculation (PDF files only)
 - **Page size**: Estimates based on A4 page size assumptions (210 × 297 mm)
 
 !!! note "DPI Estimation Accuracy"
-    DPI estimation works best with full-page documents. For document excerpts or non-standard page sizes, the library provides reasonable defaults and helpful warnings when assumptions may not apply.
+    DPI estimation works best with full-page documents. For document excerpts or non-standard page sizes, the library provides reasonable defaults and helpful warnings when assumptions may not apply. The estimation includes sanity checking that validates estimates and provides warnings for unrealistic values (outside 50-600 DPI range).
 
 !!! note "Many extension possibilities"
     There are many other applications and algorithms that can be used with the numpy array exposed image (from the obj.get_page() method). Examples can be found in libraries such as OpenCV, SimpleITK, Scikit-Image, Seaborn, Matplotlib, and many others. These libraries offer a wide range of tools for image processing, analysis, and visualization, allowing you to extend the capabilities of the Cucaracha library to meet your specific needs.
