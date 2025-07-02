@@ -4,6 +4,13 @@ import cv2 as cv
 import numpy as np
 import pytesseract
 
+try:
+    import easyocr
+
+    EASYOCR_AVAILABLE = True
+except ImportError:
+    EASYOCR_AVAILABLE = False
+
 
 def extract_text_tesseract(input: np.ndarray, lang='eng', config='--psm 6'):
     """Extract text from an image using Tesseract OCR.
@@ -117,11 +124,12 @@ def extract_text_tesseract(input: np.ndarray, lang='eng', config='--psm 6'):
         return input, extra_info
 
 
-def extract_text_simple(input: np.ndarray, lang='eng'):
-    """Simple text extraction from an image using Tesseract OCR with default settings.
+def extract_text(input: np.ndarray, lang='eng'):
+    """Extract text from an image using OCR with optimized default settings.
 
-    This is a simplified version of extract_text_tesseract that uses default
-    Tesseract settings optimized for general document text extraction.
+    This is a simplified text extraction method that uses default OCR settings
+    optimized for general document text extraction. This method serves as the
+    main text extraction interface that can utilize different OCR backends.
 
     Args:
         input (np.ndarray): The input image containing text to be extracted.
@@ -134,7 +142,7 @@ def extract_text_simple(input: np.ndarray, lang='eng'):
 
     Examples:
         >>> input_img = cv.imread('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.png')
-        >>> output_img, extra = extract_text_simple(input_img)
+        >>> output_img, extra = extract_text(input_img)
         >>> 'extracted_text' in extra
         True
     """
@@ -143,3 +151,123 @@ def extract_text_simple(input: np.ndarray, lang='eng'):
         lang=lang,
         config='--psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ',
     )
+
+
+def extract_text_easyocr(input: np.ndarray, lang=['en'], gpu=False):
+    """Extract text from an image using EasyOCR.
+
+    This method uses EasyOCR for text extraction, providing an alternative to
+    Tesseract. EasyOCR is particularly effective for multilingual text and
+    doesn't require system-level installation like Tesseract.
+
+    Note:
+        EasyOCR performs well on various text orientations and supports many
+        languages out of the box. The first run may take longer as it downloads
+        the required models.
+
+    Examples:
+        >>> input_img = cv.imread('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.png')
+        >>> output_img, extra = extract_text_easyocr(input_img)
+        >>> 'extracted_text' in extra
+        True
+        >>> 'confidence' in extra
+        True
+        >>> isinstance(extra['extracted_text'], str)
+        True
+
+    Args:
+        input (np.ndarray): The input image containing text to be extracted.
+            Can be in color (BGR) or grayscale format.
+        lang (list, optional): List of language codes for OCR. Defaults to ['en'].
+            Common options: ['en'], ['pt'], ['es'], ['fr'], etc.
+            Can also use multiple languages: ['en', 'pt']
+        gpu (bool, optional): Whether to use GPU acceleration. Defaults to False.
+            Requires CUDA-compatible GPU and proper EasyOCR installation.
+
+    Returns:
+        tuple: A tuple containing:
+            - np.ndarray: The original input image (unchanged)
+            - dict: Dictionary with extracted information:
+                - 'extracted_text': The text content extracted from the image
+                - 'confidence': Overall confidence score of the OCR result (0-1)
+                - 'word_data': Detailed word-level data with bounding boxes and confidences
+                - 'lang': Languages used for OCR
+                - 'method': OCR method used ('easyocr')
+
+    Raises:
+        ImportError: If EasyOCR is not installed
+        Exception: If there's an error during OCR processing
+    """
+    if not EASYOCR_AVAILABLE:
+        extra_info = {
+            'extracted_text': '',
+            'confidence': 0.0,
+            'word_data': [],
+            'lang': lang,
+            'method': 'easyocr',
+            'error': 'EasyOCR is not installed. Please install it with: pip install easyocr',
+        }
+        return input, extra_info
+
+    try:
+        # Initialize EasyOCR reader
+        reader = easyocr.Reader(lang, gpu=gpu)
+
+        # Extract text using EasyOCR
+        results = reader.readtext(input, detail=1)
+
+        # Process results
+        extracted_text = ''
+        word_data = []
+        confidences = []
+
+        for (bbox, text, confidence) in results:
+            extracted_text += text + ' '
+            confidences.append(confidence)
+
+            # Convert bbox to left, top, width, height format
+            x_coords = [point[0] for point in bbox]
+            y_coords = [point[1] for point in bbox]
+            left = int(min(x_coords))
+            top = int(min(y_coords))
+            width = int(max(x_coords) - min(x_coords))
+            height = int(max(y_coords) - min(y_coords))
+
+            word_info = {
+                'text': text,
+                'confidence': float(confidence),
+                'left': left,
+                'top': top,
+                'width': width,
+                'height': height,
+                'bbox': bbox,  # Original bounding box coordinates
+            }
+            word_data.append(word_info)
+
+        # Calculate overall confidence
+        overall_confidence = (
+            sum(confidences) / len(confidences) if confidences else 0.0
+        )
+
+        extra_info = {
+            'extracted_text': extracted_text.strip(),
+            'confidence': overall_confidence,
+            'word_data': word_data,
+            'lang': lang,
+            'method': 'easyocr',
+        }
+
+        # Return original image unchanged and the extracted information
+        return input, extra_info
+
+    except Exception as e:
+        # Handle potential errors gracefully
+        extra_info = {
+            'extracted_text': '',
+            'confidence': 0.0,
+            'word_data': [],
+            'lang': lang,
+            'method': 'easyocr',
+            'error': str(e),
+        }
+        return input, extra_info

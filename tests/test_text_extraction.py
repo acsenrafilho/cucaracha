@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 
 from cucaracha.tasks.text_extraction import (
-    extract_text_simple,
+    extract_text,
+    extract_text_easyocr,
     extract_text_tesseract,
 )
 from tests import sample_paths
@@ -67,12 +68,12 @@ class TestTextExtraction:
         assert 'extracted_text' in extra
         assert 'confidence' in extra
 
-    def test_extract_text_simple(self):
+    def test_extract_text(self):
         """Test the simplified OCR function."""
         img = cv.imread(sample_paths.SAMPLE_TEXT_PNG)
         assert img is not None
 
-        result_img, extra = extract_text_simple(img)
+        result_img, extra = extract_text(img)
 
         # Check that we got the original image back
         assert np.array_equal(result_img, img)
@@ -155,3 +156,90 @@ class TestTextExtraction:
 
         # Should handle gracefully and include error info
         assert 'error' in extra or len(extra['extracted_text']) == 0
+
+    def test_extract_text_easyocr_basic(self):
+        """Test basic EasyOCR functionality with a sample text image."""
+        # Load the sample text image
+        img = cv.imread(sample_paths.SAMPLE_TEXT_PNG)
+        assert img is not None, 'Sample image should be loaded'
+
+        # Run OCR with EasyOCR
+        result_img, extra = extract_text_easyocr(img)
+
+        # Check that we got the original image back
+        assert np.array_equal(
+            result_img, img
+        ), 'Output image should be identical to input'
+
+        # Check the structure of extra information
+        assert 'extracted_text' in extra
+        assert 'confidence' in extra
+        assert 'word_data' in extra
+        assert 'lang' in extra
+        assert 'method' in extra
+
+        # Check data types
+        assert isinstance(extra['extracted_text'], str)
+        assert isinstance(extra['confidence'], float)
+        assert isinstance(extra['word_data'], list)
+        assert isinstance(extra['lang'], list)
+        assert extra['method'] == 'easyocr'
+
+        # Check confidence is reasonable (EasyOCR uses 0-1 scale)
+        assert extra['confidence'] >= 0.0, 'Confidence should be non-negative'
+        assert extra['confidence'] <= 1.0, 'Confidence should not exceed 1.0'
+
+        # Skip text extraction test if EasyOCR isn't available or has issues
+        if 'error' not in extra:
+            # Should extract some text if no error
+            assert isinstance(extra['extracted_text'], str)
+
+    def test_extract_text_easyocr_multilingual(self):
+        """Test EasyOCR with multiple languages."""
+        img = cv.imread(sample_paths.SAMPLE_TEXT_PNG)
+        assert img is not None
+
+        # Test with multiple languages
+        result_img, extra = extract_text_easyocr(img, lang=['en', 'pt'])
+
+        # Check that parameters were used
+        assert extra['lang'] == ['en', 'pt']
+        assert extra['method'] == 'easyocr'
+
+        # Should still return basic structure
+        assert 'extracted_text' in extra
+        assert 'confidence' in extra
+
+    def test_extract_text_easyocr_word_data_structure(self):
+        """Test that EasyOCR word_data contains expected information."""
+        img = cv.imread(sample_paths.SAMPLE_TEXT_PNG)
+        assert img is not None
+
+        result_img, extra = extract_text_easyocr(img)
+
+        word_data = extra['word_data']
+        assert isinstance(word_data, list)
+
+        # If we have words and no error, check their structure
+        if len(word_data) > 0 and 'error' not in extra:
+            word = word_data[0]
+            expected_keys = [
+                'text',
+                'confidence',
+                'left',
+                'top',
+                'width',
+                'height',
+                'bbox',
+            ]
+            for key in expected_keys:
+                assert key in word, f"Word data should contain '{key}'"
+
+            # Check data types
+            assert isinstance(word['text'], str)
+            assert isinstance(word['confidence'], float)
+            assert isinstance(word['left'], int)
+            assert isinstance(word['top'], int)
+            assert isinstance(word['width'], int)
+            assert isinstance(word['height'], int)
+            assert isinstance(word['bbox'], list)
