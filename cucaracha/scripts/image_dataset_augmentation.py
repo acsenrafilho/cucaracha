@@ -59,11 +59,11 @@ args = parser.parse_args()
 
 
 def check_parameters():
-    is_ok=True
+    is_ok = True
 
     # Check if dataset_path exist
     if not os.path.exists(args.dataset_path):
-        is_ok=False
+        is_ok = False
 
     return is_ok
 
@@ -97,7 +97,9 @@ def _augment_batch_and_save(batch):
 
 
 if not check_parameters():
-    print('[bold red]Some parameters are not correct. Please check the parameters and try again.')
+    print(
+        '[bold red]Some parameters are not correct. Please check the parameters and try again.'
+    )
     exit(0)
 
 
