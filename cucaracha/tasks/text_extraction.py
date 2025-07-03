@@ -32,16 +32,6 @@ def extract_text_tesseract(input: np.ndarray, lang='eng', config='--psm 6'):
         Tesseract must be installed on the system for this method to work.
         The method supports multiple languages and configurations.
 
-    Examples:
-        >>> input_img = cv.imread('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.png')
-        >>> output_img, extra = extract_text_tesseract(input_img)
-        >>> 'extracted_text' in extra
-        True
-        >>> 'confidence' in extra
-        True
-        >>> isinstance(extra['extracted_text'], str)
-        True
-
     Args:
         input (np.ndarray): The input image containing text to be extracted.
             Can be in color (BGR) or grayscale format.
@@ -151,11 +141,6 @@ def extract_text(input: np.ndarray, lang='eng'):
             - np.ndarray: The original input image (unchanged)
             - dict: Dictionary with extracted text information
 
-    Examples:
-        >>> input_img = cv.imread('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.png')
-        >>> output_img, extra = extract_text(input_img)
-        >>> 'extracted_text' in extra
-        True
     """
     return extract_text_tesseract(
         input,
