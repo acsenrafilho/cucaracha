@@ -176,16 +176,6 @@ def extract_text_easyocr(input: np.ndarray, lang=['en'], gpu=False):
         languages out of the box. The first run may take longer as it downloads
         the required models.
 
-    Examples:
-        >>> input_img = cv.imread('.'+os.sep+'tests'+os.sep+'files'+os.sep+'sample-text-en.png')
-        >>> output_img, extra = extract_text_easyocr(input_img)
-        >>> 'extracted_text' in extra
-        True
-        >>> 'confidence' in extra
-        True
-        >>> isinstance(extra['extracted_text'], str)
-        True
-
     Args:
         input (np.ndarray): The input image containing text to be extracted.
             Can be in color (BGR) or grayscale format.
