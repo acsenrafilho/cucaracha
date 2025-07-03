@@ -1,4 +1,4 @@
-name: CI_lib
+name: Project CI
 on: 
   push:
     branches: [ main , develop ]
@@ -34,6 +34,9 @@ jobs:
       - name: Install cucaracha project dependecies
         run: poetry install
 
+      - name: Install Tesseract OCR
+        run: sudo apt-get update && sudo apt-get install tesseract-ocr -y
+
       - name: Run project tests
         run: poetry run task test --cov-report=xml --ignore-glob='./cucaracha/scripts/*.py'
 
@@ -65,6 +68,9 @@ jobs:
 
       - name: Install cucaracha project dependecies
         run: poetry install
+
+      - name: Install Tesseract OCR
+        run: brew install tesseract
 
       - name: Run project tests
         run: poetry run task test --cov-report=xml --ignore-glob='./cucaracha/scripts/*.py'
