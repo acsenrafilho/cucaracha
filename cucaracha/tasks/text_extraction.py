@@ -1,4 +1,6 @@
 import os
+import shutil
+import sys
 
 import cv2 as cv
 import numpy as np
@@ -64,6 +66,15 @@ def extract_text_tesseract(input: np.ndarray, lang='eng', config='--psm 6'):
     Raises:
         Exception: If Tesseract is not installed or there's an error during OCR processing
     """
+    # Check if tesseract-ocr is installed on the system
+    tesseract_cmd = shutil.which('tesseract')
+    if tesseract_cmd is None:
+        raise EnvironmentError(
+            'Tesseract OCR is not installed or not found in PATH. '
+            "Please install it (e.g., 'sudo apt install tesseract-ocr' on Linux, "
+            "'brew install tesseract' on macOS) and ensure it's available in your PATH."
+        )
+
     try:
         # Extract text using Tesseract
         extracted_text = pytesseract.image_to_string(
